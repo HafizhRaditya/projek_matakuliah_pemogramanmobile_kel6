@@ -82,3 +82,26 @@ Atau buka folder ini di Android Studio, lalu tekan **Run**.
 - [ ] Navigasi antar layar dengan `NavHost`
 - [ ] Notifikasi saat sesi Pomodoro selesai
 - [ ] Unit test `TaskViewModel` memakai `FakeTaskRepository`
+
+## Catatan build (penting saat clone pertama kali)
+
+Proyek ini memakai AGP 9 yang sudah membawa Kotlin sendiri (*built-in Kotlin*).
+Ada dua penyesuaian yang sudah dilakukan dan sebaiknya jangan dihapus:
+
+1. **`android.disallowKotlinSourceSets=false` di `gradle.properties`**
+   KSP (pembangkit kode Room) masih mendaftarkan folder hasil generate lewat
+   `kotlin.sourceSets`, cara yang kini dilarang AGP 9. Tanpa baris ini, build
+   berhenti dengan pesan *"Using kotlin.sourceSets DSL to add Kotlin sources is
+   not allowed with built-in Kotlin"*. Baris ini boleh dihapus setelah KSP
+   merilis versi yang mendukung built-in Kotlin.
+
+2. **`material-icons-core` ditulis eksplisit di `build.gradle.kts`**
+   Compose BOM versi baru tidak lagi menarik pustaka ikon lewat `material3`.
+   Tanpa dependensi ini muncul error *"Unresolved reference: Icons"*.
+
+Status terakhir yang sudah diverifikasi:
+
+```
+./gradlew :app:assembleDebug :app:testDebugUnitTest
+BUILD SUCCESSFUL
+```

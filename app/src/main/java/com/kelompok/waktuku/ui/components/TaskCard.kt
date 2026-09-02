@@ -134,7 +134,7 @@ private fun buildMetaLabel(task: Task): String {
     task.dueAt?.let { millis ->
         // SimpleDateFormat dipakai (bukan java.time) karena minSdk proyek ini
         // 24, sedangkan java.time baru tersedia mulai API 26.
-        val formatter = SimpleDateFormat("d MMM yyyy", Locale("id", "ID"))
+        val formatter = SimpleDateFormat("d MMM yyyy", Locale.forLanguageTag("id-ID"))
         parts += formatter.format(Date(millis))
     }
 
