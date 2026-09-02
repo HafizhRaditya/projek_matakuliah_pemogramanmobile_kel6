@@ -3,6 +3,10 @@
 Aplikasi Android **luring** (offline) untuk perencanaan pribadi dan timer Pomodoro.
 Proyek mata kuliah Pemrograman Mobile - Kelompok 6, Teknik Informatika.
 
+> **Dokumentasi lengkap ada di [DOKUMENTASI.md](DOKUMENTASI.md)** - berisi penjelasan
+> tiap file, diagram alur MVVM, alasan di balik setiap keputusan teknis, kendala
+> build yang sudah ditambal, dan bahan tanya-jawab untuk presentasi.
+
 ## Arsitektur
 
 Mengikuti panduan resmi [Android App Architecture](https://developer.android.com/topic/architecture/intro)
