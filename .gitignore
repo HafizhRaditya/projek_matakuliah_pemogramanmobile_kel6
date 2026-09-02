@@ -1,0 +1,23 @@
+# --- Gradle & build ---
+*.iml
+.gradle/
+/local.properties
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+
+# --- Android Studio / IntelliJ ---
+# .idea diabaikan seluruhnya agar setelan pribadi tiap anggota kelompok
+# tidak saling menimpa dan memicu konflik Git.
+.idea/
+
+# --- Sistem operasi ---
+.DS_Store
+Thumbs.db
+
+# --- Kunci penandatanganan (JANGAN PERNAH di-commit) ---
+*.jks
+*.keystore
+keystore.properties
