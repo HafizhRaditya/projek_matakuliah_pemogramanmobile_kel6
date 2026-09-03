@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.kelompok.waktuku.ui.screens.HomeScreen
+import com.kelompok.waktuku.ui.WaktuKuApp
 import com.kelompok.waktuku.ui.theme.WaktuKuTheme
 
 // ============================================================================
@@ -20,9 +20,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WaktuKuTheme {
-                // Nanti saat WaktuKu punya lebih dari satu layar (Home,
-                // Pomodoro, Statistik), baris ini diganti dengan NavHost.
-                HomeScreen()
+                // WaktuKuApp memegang bilah navigasi bawah dan NavHost.
+                // Activity ini sengaja dibuat setipis mungkin: tugasnya hanya
+                // menyalakan tema lalu menyerahkan seluruh UI ke Compose.
+                WaktuKuApp()
             }
         }
     }
