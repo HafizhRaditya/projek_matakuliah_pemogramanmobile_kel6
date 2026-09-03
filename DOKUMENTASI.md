@@ -176,6 +176,16 @@ Teks setengah jadi belum berarti apa-apa bagi aplikasi; ia baru menjadi data
 setelah tombol Simpan ditekan. Mengirim setiap ketukan huruf ke ViewModel hanya
 membuatnya bekerja puluhan kali tanpa manfaat.
 
+**Validasi input memakai `isError` + `supportingText`, bukan tombol mati.**
+Pada `AddTaskDialog`, satu nilai `tampilkanError` dipakai bersama oleh `isError`
+(mewarnai field merah) dan `supportingText` (menampilkan pesannya), sehingga
+mustahil muncul keadaan janggal berupa field merah tanpa penjelasan. Tombol
+Simpan sengaja tidak dinonaktifkan: pengguna yang menekannya tanpa mengisi
+apa pun tetap mendapat alasan, bukan sekadar tombol mati. Pesan pendukung juga
+selalu dirender - berisi petunjuk saat normal dan pesan kesalahan saat kosong -
+supaya tinggi dialog tidak melompat. Pola ini mengikuti materi kuliah
+Pertemuan 3 tentang Material Design 3 dan Form Components.
+
 **Aturan pembatas antar anggota:**
 `TaskViewModel` tidak boleh mengimpor apa pun dari `androidx.compose.*`, dan
 Composable tidak boleh mengubah `uiState` langsung. Kalau aturan ini dilanggar,
