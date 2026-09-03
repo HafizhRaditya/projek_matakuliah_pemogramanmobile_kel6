@@ -59,12 +59,12 @@ Empat aturan yang dipakai untuk memutuskan saat ada perdebatan fitur:
 | Kode | Fitur | Prioritas | PIC utama |
 |---|---|---|---|
 | F1 | Home diperbarui: ketuk kartu, tombol mulai fokus, progres sesi | **P0** | M1 + M2 |
-| F2 | Navigasi antar layar (`NavHost`) | **P0** | M1 |
+| F2 | Navigasi antar layar (`NavHost`) | **P0** | M4 |
 | F3 | Timer Pomodoro terikat tugas | **P0** | M2 + M3 |
-| F4 | Notifikasi saat sesi berakhir | **P0** | M2 |
+| F4 | Notifikasi saat sesi berakhir | **P0** | M4 |
 | F5 | Detail / edit tugas | P1 | M1 + M3 |
 | F6 | Statistik sederhana | P2 | M3 + M1 |
-| F7 | Pengaturan durasi & tema | P3 | M1 |
+| F7 | Pengaturan durasi & tema | P3 | M4 + M1 |
 
 ### 4.3 Di luar lingkup — tidak dikerjakan semester ini
 
@@ -248,15 +248,15 @@ fitur yang setengahnya error saat demo.
 
 ## 10. Rencana kerja 4 minggu
 
-| Minggu | Mahasiswa 1 (UI) | Mahasiswa 2 (ViewModel) | Mahasiswa 3 (Data) |
-|---|---|---|---|
-| 1 | `NavHost` + bottom nav, kerangka `TimerScreen` | `PomodoroViewModel` berbasis `targetEndMillis` | `PomodoroSession`, DAO, Migration 1→2 |
-| 2 | Timer tampil penuh, Home diperbarui (F1) | Sambungkan timer ke repository, notifikasi (F4) | `PomodoroRepository`, query statistik |
-| 3 | Layar Detail/edit (F5) | Logika edit + validasi | Query rekap 7 hari |
-| 4 | Statistik (F6), Pengaturan (F7) bila sempat | Perbaikan bug, unit test `TaskViewModel` | Uji Migration, rapikan dokumentasi |
+| Minggu | Mahasiswa 1 (UI) | Mahasiswa 2 (ViewModel) | Mahasiswa 3 (Data) | Mahasiswa 4 (Navigasi & Sistem) |
+|---|---|---|---|---|
+| 1 | Kerangka `TimerScreen` | `PomodoroViewModel` berbasis `targetEndMillis` | `PomodoroSession`, DAO, Migration 1→2 | `NavHost` + bottom navigation (F2) |
+| 2 | Timer tampil penuh, Home diperbarui (F1) | Sambungkan timer ke repository | `PomodoroRepository`, query statistik | Notifikasi + izin `POST_NOTIFICATIONS` (F4) |
+| 3 | Layar Detail/edit (F5) | Logika edit + validasi | Query rekap 7 hari | `DataStore` untuk Pengaturan (F7) |
+| 4 | Statistik (F6) | Perbaikan bug, unit test `TaskViewModel` | Uji Migration, rapikan dokumentasi | Layar Pengaturan, uji navigasi & tombol kembali |
 
-Titik sinkronisasi: **akhir minggu 1**, pastikan `NavHost` dan `PomodoroSession`
-sudah bertemu, karena dua hal itu yang saling menunggu.
+Titik sinkronisasi: **akhir minggu 1**, pastikan `NavHost` (M4) dan
+`PomodoroSession` (M3) sudah bertemu, karena keduanya menahan pekerjaan M1 dan M2.
 
 ---
 

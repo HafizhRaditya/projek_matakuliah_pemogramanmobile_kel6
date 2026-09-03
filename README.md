@@ -58,8 +58,9 @@ app/src/main/java/com/kelompok/waktuku/
 | Mahasiswa 1 | UI/UX (Jetpack Compose) | `ui/screens`, `ui/components`, `ui/theme` |
 | Mahasiswa 2 | State & logika | `ui/viewmodel` |
 | Mahasiswa 3 | Local storage | `model`, `data` |
+| Mahasiswa 4 | Navigasi & integrasi sistem | `ui/navigation`, `notification`, `data/preferences` |
 
-Batas folder ini dipilih supaya tiga orang bisa bekerja bersamaan tanpa
+Batas folder ini dipilih supaya empat orang bisa bekerja bersamaan tanpa
 menyunting file yang sama - konflik Git jadi minimal.
 
 ## Teknologi

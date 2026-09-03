@@ -190,9 +190,14 @@ artinya ada logika yang bocor melewati batas lapisan.
 | Mahasiswa 1 | UI/UX Jetpack Compose | `ui/screens`, `ui/components`, `ui/theme` | 3 file, 651 baris |
 | Mahasiswa 2 | State & logika | `ui/viewmodel` | 1 file, 181 baris |
 | Mahasiswa 3 | Local storage Room | `model`, `data` | 6 file, 373 baris |
+| Mahasiswa 4 | Navigasi & integrasi sistem | `ui/navigation`, `notification`, `data/preferences` | belum ada - mulai sprint berikutnya |
 
-Batas folder ini dipilih agar tiga orang bisa bekerja bersamaan tanpa menyunting
+Batas folder ini dipilih agar empat orang bisa bekerja bersamaan tanpa menyunting
 file yang sama, sehingga konflik Git minimal.
+
+Catatan: pada tahap kick-off ini baru tiga lapisan yang punya kode, karena
+navigasi memang belum dibutuhkan saat aplikasi masih satu layar. Mahasiswa 4
+mulai bekerja begitu layar kedua (Timer) ada.
 
 ---
 
