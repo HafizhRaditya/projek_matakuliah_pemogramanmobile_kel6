@@ -109,12 +109,18 @@ Sebuah fitur baru boleh disebut "selesai" kalau **semua** kriterianya terpenuhi.
 > Sebagai mahasiswa, saya ingin melihat berapa sesi fokus yang sudah saya
 > curahkan pada tiap tugas, agar tahu tugas mana yang sebenarnya terbengkalai.
 
-- [ ] Kartu tugas menampilkan progres sesi, contoh "2/4 sesi"
-- [ ] Setiap kartu punya tombol mulai fokus yang langsung membuka Timer dengan
-      tugas tersebut
-- [ ] Mengetuk badan kartu membuka layar Detail Tugas
-- [ ] Mencentang tugas tetap berfungsi seperti sebelumnya
-- [ ] Tugas yang sudah selesai tidak menampilkan tombol fokus
+- [x] Kartu tugas menampilkan progres sesi, contoh "2/4 sesi"
+- [x] Setiap kartu punya tombol mulai fokus yang langsung membuka Timer dengan
+      tugas tersebut — layar tujuannya masih placeholder sampai F3 selesai,
+      tetapi `taskId` sudah terkirim dengan benar
+- [x] Mengetuk badan kartu membuka layar Detail Tugas — layar tujuannya masih
+      placeholder sampai F5 selesai
+- [x] Mencentang tugas tetap berfungsi seperti sebelumnya
+- [x] Tugas yang sudah selesai tidak menampilkan tombol fokus
+
+Tambahan di luar kriteria: ikon gerigi di TopAppBar, sehingga layar Pengaturan
+(F7) kini bisa dicapai. Sebelumnya rute `settings` terdaftar tapi tidak ada
+jalan menujunya.
 
 ### F2 — Navigasi · P0
 

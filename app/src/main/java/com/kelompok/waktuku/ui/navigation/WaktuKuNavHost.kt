@@ -38,15 +38,24 @@ fun WaktuKuNavHost(
         // BERANDA - satu-satunya layar yang sudah jadi
         // ------------------------------------------------------------------
         composable(route = WaktuKuRoutes.HOME) {
-            // CATATAN UNTUK MAHASISWA 1 (fitur F1):
-            // Saat kartu tugas nanti diberi tombol fokus dan aksi ketuk,
-            // tambahkan parameter callback pada HomeScreen lalu sambungkan
-            // di sini:
-            //   onTaskClick   = { id -> navController.navigate(WaktuKuRoutes.taskDetail(id)) }
-            //   onStartFocus  = { id -> navController.navigate(WaktuKuRoutes.timer(id)) }
-            //   onOpenSettings= { navController.navigate(WaktuKuRoutes.SETTINGS) }
-            // Fungsi pembangun rutenya sudah siap di WaktuKuDestinations.kt.
-            HomeScreen()
+            // Di sinilah kejadian dari Beranda diterjemahkan menjadi
+            // perpindahan layar. HomeScreen sendiri tidak tahu apa-apa soal
+            // NavController - ia hanya melaporkan "kartu ditekan", dan berkas
+            // inilah yang memutuskan artinya "buka Detail Tugas".
+            //
+            // Pemisahan ini yang membuat HomeScreen tetap bisa di-@Preview
+            // tanpa navigasi sama sekali.
+            HomeScreen(
+                onTaskClick = { taskId ->
+                    navController.navigate(WaktuKuRoutes.taskDetail(taskId))
+                },
+                onStartFocus = { taskId ->
+                    navController.navigate(WaktuKuRoutes.timer(taskId))
+                },
+                onOpenSettings = {
+                    navController.navigate(WaktuKuRoutes.SETTINGS)
+                },
+            )
         }
 
         // ------------------------------------------------------------------
