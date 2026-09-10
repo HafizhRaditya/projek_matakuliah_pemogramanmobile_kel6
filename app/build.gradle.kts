@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
+    // --- Navigasi antar layar ---
+    implementation(libs.androidx.navigation.compose)
+
     // --- Room (database lokal, aplikasi tetap jalan tanpa internet) ---
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

@@ -121,11 +121,12 @@ Sebuah fitur baru boleh disebut "selesai" kalau **semua** kriterianya terpenuhi.
 > Sebagai pengguna, saya ingin berpindah antar Beranda, Fokus, dan Statistik
 > tanpa kehilangan posisi saya.
 
-- [ ] `NavHost` dengan rute: `home`, `task/{taskId}`, `timer/{taskId}`, `stats`, `settings`
-- [ ] Bottom navigation tiga tab, tab aktif ditandai jelas
+- [x] `NavHost` dengan rute: `home`, `task/{taskId}`, `timer?taskId={taskId}`, `stats`, `settings`
+- [x] Bottom navigation tiga tab, tab aktif ditandai jelas
 - [ ] Tombol kembali perangkat berperilaku wajar (tidak keluar aplikasi dari
-      layar dalam)
-- [ ] Memutar layar tidak mengembalikan pengguna ke Beranda
+      layar dalam) — kode sudah ada (`popUpTo` + `saveState`), menunggu uji di perangkat
+- [ ] Memutar layar tidak mengembalikan pengguna ke Beranda — kode sudah ada
+      (`rememberNavController`), menunggu uji di perangkat
 
 ### F3 — Timer Pomodoro · P0
 
