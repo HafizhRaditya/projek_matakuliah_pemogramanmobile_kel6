@@ -139,13 +139,26 @@ jalan menujunya.
 > Sebagai mahasiswa, saya ingin menjalankan sesi fokus 25 menit untuk satu tugas,
 > agar bisa bekerja tanpa terganggu.
 
-- [ ] Hitung mundur menampilkan menit:detik dan indikator lingkaran progres
-- [ ] Tombol Mulai, Jeda, Lanjut, dan Hentikan
-- [ ] Judul tugas yang sedang dikerjakan tampil di layar timer
-- [ ] Siklus otomatis: 4 sesi fokus diselingi istirahat pendek, lalu istirahat panjang
-- [ ] **Waktu tetap akurat walau aplikasi ditutup atau layar dimatikan**
-- [ ] Sesi yang selesai penuh tersimpan ke database dan menambah progres tugas
-- [ ] Sesi yang dihentikan di tengah jalan **tidak** dihitung
+- [x] Hitung mundur menampilkan menit:detik dan indikator lingkaran progres
+- [x] Tombol Mulai, Jeda, Lanjut, dan Hentikan
+- [x] Judul tugas yang sedang dikerjakan tampil di layar timer
+- [x] Siklus otomatis: 4 sesi fokus diselingi istirahat pendek, lalu istirahat panjang
+      — dibuktikan uji unit `empat sesi fokus diikuti istirahat panjang`
+- [x] **Waktu tetap akurat walau aplikasi ditutup atau layar dimatikan**
+      — dibuktikan uji unit `timer tetap akurat setelah aplikasi lama ditinggalkan`.
+      Lihat batasannya di bawah
+- [x] Sesi yang selesai penuh tersimpan ke database dan menambah progres tugas
+      — dibuktikan uji unit
+- [x] Sesi yang dihentikan di tengah jalan **tidak** dihitung
+      — dibuktikan uji unit
+
+**Batasan yang masih tersisa.** `targetEndMillis` disimpan di dalam ViewModel,
+yang hidup selama proses aplikasi hidup. Artinya timer tetap akurat saat layar
+dimatikan atau aplikasi berpindah ke latar belakang, tetapi **hilang bila
+pengguna menggeser aplikasi dari daftar aplikasi terkini** atau Android
+mematikan prosesnya karena kehabisan memori. Untuk menutup celah itu,
+`targetEndMillis` perlu disimpan ke `SavedStateHandle` atau DataStore. Dicatat
+di sini supaya tidak terlupakan, bukan diabaikan.
 
 ### F4 — Notifikasi · P0
 
