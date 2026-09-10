@@ -21,6 +21,7 @@ import android.content.Context
 /** Kontrak berisi semua dependensi tingkat aplikasi. */
 interface AppContainer {
     val taskRepository: TaskRepository
+    val pomodoroRepository: PomodoroRepository
 }
 
 /**
@@ -34,5 +35,9 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val taskRepository: TaskRepository by lazy {
         OfflineTaskRepository(WaktuKuDatabase.getDatabase(context).taskDao())
+    }
+
+    override val pomodoroRepository: PomodoroRepository by lazy {
+        OfflinePomodoroRepository(WaktuKuDatabase.getDatabase(context).pomodoroDao())
     }
 }

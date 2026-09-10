@@ -51,9 +51,19 @@ data class Task(
     val isDone: Boolean = false,
 
     // Target jumlah sesi Pomodoro untuk menyelesaikan tugas ini.
-    // Dipakai fitur timer pada sprint berikutnya.
     @ColumnInfo(name = "estimated_pomodoros")
     val estimatedPomodoros: Int = 1,
+
+    // Jumlah sesi fokus yang SUDAH diselesaikan penuh untuk tugas ini.
+    // Bersama estimatedPomodoros, dua kolom inilah yang menghasilkan teks
+    // "2/4 sesi" pada kartu tugas di Beranda.
+    //
+    // Nilainya sengaja disimpan di sini, bukan dihitung ulang dengan
+    // COUNT(*) ke tabel sesi setiap kali kartu digambar. Alasannya: kartu
+    // tugas digambar ulang sangat sering oleh LazyColumn, dan menjalankan
+    // subquery pada setiap penggambaran itu pemborosan.
+    @ColumnInfo(name = "completed_pomodoros")
+    val completedPomodoros: Int = 0,
 
     // Waktu pembuatan, dipakai sebagai urutan cadangan bila tidak ada tenggat.
     @ColumnInfo(name = "created_at")

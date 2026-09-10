@@ -38,6 +38,24 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // MigrationTest membaca berkas skema JSON saat berjalan di perangkat.
+    // Baris ini menyalin folder schemas/ ke dalam aset uji instrumentasi,
+    // sehingga MigrationTestHelper bisa menemukannya. Tanpa ini, ujinya gagal
+    // dengan pesan "Cannot find the schema file in the assets folder".
+    sourceSets {
+        getByName("androidTest") {
+            assets.directories.add("$projectDir/schemas")
+        }
+    }
+}
+
+// Room menuliskan struktur database sebagai berkas JSON ke folder ini setiap
+// kali build. Berkas itulah yang dipakai MigrationTest untuk membuat database
+// versi lama, lalu memastikan Migration kita benar-benar bekerja.
+// Folder schemas/ WAJIB ikut di-commit ke Git.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
