@@ -63,6 +63,82 @@ app/src/main/java/com/kelompok/waktuku/
 Batas folder ini dipilih supaya empat orang bisa bekerja bersamaan tanpa
 menyunting file yang sama - konflik Git jadi minimal.
 
+## Panduan untuk anggota kelompok
+
+Baca bagian ini sekali sebelum mulai. Isinya hal-hal yang kalau tidak
+disepakati di awal akan jadi sumber ribut di tengah jalan.
+
+### Sekali saja, saat pertama kali
+
+```bash
+git clone https://github.com/HafizhRaditya/projek_matakuliah_pemogramanmobile_kel6.git
+```
+
+Lalu buka Android Studio, pilih **File -> Open**, arahkan ke folder hasil clone
+(pilih folder induknya, bukan folder `app` di dalamnya). Tunggu Gradle sync
+selesai sampai bar bawah berhenti bergerak. Sync pertama memakan waktu lama
+karena harus mengunduh Room, Compose, dan Navigation - lakukan di rumah, jangan
+saat sedang kerja kelompok.
+
+Jangan pernah meng-commit `local.properties`, folder `build/`, atau `.idea/`.
+Ketiganya sudah diabaikan `.gitignore` dan memang harus begitu, karena isinya
+menyesuaikan laptop masing-masing.
+
+### Setiap kali mulai mengerjakan sesuatu
+
+```bash
+git checkout main
+git pull
+git checkout -b feat/f3-timer
+```
+
+Nama branch mengikuti kode fitur di [PRD.md](PRD.md): `feat/f1-home`,
+`feat/f3-timer`, `feat/f4-notifikasi`, `feat/f5-detail`, `feat/f6-statistik`,
+`feat/f7-pengaturan`.
+
+**Selalu `git pull` di `main` dulu sebelum membuat branch.** Kalau langsung
+bercabang dari `main` yang tertinggal, nanti PR-mu penuh konflik.
+
+### Setiap kali selesai
+
+```bash
+git add -A
+git commit -m "Tambah layar timer Pomodoro"
+git push -u origin feat/f3-timer
+```
+
+Terminal akan menampilkan tautan untuk membuka Pull Request. Buka tautannya,
+isi judul, lalu tandai satu anggota lain sebagai **Reviewer**. Jangan merge PR
+sendiri tanpa ada yang melihat - itu sama saja dengan push langsung ke `main`,
+cuma lebih banyak langkahnya.
+
+### Aturan yang menjaga kita tidak saling menimpa
+
+**Hormati batas folder.** Tiap orang punya wilayahnya sendiri (lihat tabel
+Pembagian tugas di atas). Kalau kamu perlu mengubah berkas milik orang lain,
+bilang dulu di grup - jangan diam-diam.
+
+**`main` hanya boleh berisi kode yang bisa di-build.** Sebelum push, jalankan:
+
+```bash
+./gradlew :app:assembleDebug
+```
+
+Kalau merah, jangan di-push. `main` yang rusak menghambat tiga orang sekaligus.
+
+**Satu PR untuk satu fitur.** PR yang berisi lima hal sekaligus tidak akan
+ditinjau siapa pun dengan sungguh-sungguh.
+
+### Kalau tersesat
+
+| Gejala | Yang harus dilakukan |
+|---|---|
+| `git push` ditolak, "permission denied" | Kamu belum jadi collaborator, atau undangannya belum diterima. Cek email |
+| `git pull` bilang ada konflik | Jangan panik dan jangan hapus apa pun. Screenshot pesannya, tanyakan di grup |
+| Gradle sync gagal minta JDK | Biarkan Gradle mengunduh sendiri, jangan diubah manual |
+| Muncul peringatan `android.disallowKotlinSourceSets` | Normal dan disengaja, lihat bagian Catatan build di bawah |
+| Preview Compose kosong | Tekan **Build & Refresh** di panel preview |
+
 ## Teknologi
 
 | Komponen | Versi |
