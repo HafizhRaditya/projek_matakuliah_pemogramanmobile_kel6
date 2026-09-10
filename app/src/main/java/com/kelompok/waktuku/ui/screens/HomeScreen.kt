@@ -12,11 +12,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -69,6 +71,9 @@ import com.kelompok.waktuku.ui.viewmodel.TaskViewModel
  */
 @Composable
 fun HomeScreen(
+    onTaskClick: (Long) -> Unit,
+    onStartFocus: (Long) -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TaskViewModel = viewModel(factory = TaskViewModel.Factory),
 ) {
@@ -83,6 +88,13 @@ fun HomeScreen(
         onToggleDone = viewModel::toggleTaskDone,
         onDeleteTask = viewModel::deleteTask,
         onAddTask = { title, priority -> viewModel.addTask(title = title, priority = priority) },
+        // Tiga callback ini tidak menyentuh ViewModel sama sekali - mereka
+        // hanya diteruskan ke atas, ke NavHost. Alasannya: berpindah layar
+        // adalah urusan navigasi, bukan urusan state tugas. ViewModel tidak
+        // perlu tahu bahwa aplikasi ini punya layar lain.
+        onTaskClick = onTaskClick,
+        onStartFocus = onStartFocus,
+        onOpenSettings = onOpenSettings,
         modifier = modifier,
     )
 }
@@ -95,6 +107,9 @@ fun HomeScreen(
  * @param onToggleDone dilaporkan saat kotak centang sebuah tugas ditekan.
  * @param onDeleteTask dilaporkan saat tugas dihapus.
  * @param onAddTask dilaporkan saat tugas baru dikirim dari dialog.
+ * @param onTaskClick dilaporkan saat badan kartu ditekan, membawa id tugas.
+ * @param onStartFocus dilaporkan saat tombol mulai fokus ditekan.
+ * @param onOpenSettings dilaporkan saat ikon gerigi ditekan.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,6 +119,9 @@ fun HomeScreen(
     onToggleDone: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
     onAddTask: (String, TaskPriority) -> Unit,
+    onTaskClick: (Long) -> Unit,
+    onStartFocus: (Long) -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // State milik UI semata (dialog sedang terbuka atau tidak) BOLEH disimpan
@@ -125,8 +143,17 @@ fun HomeScreen(
                         text = "${uiState.doneCount}/${uiState.totalCount} selesai",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(end = 16.dp),
                     )
+                    // Pengaturan sengaja TIDAK dijadikan tab di bawah. Panduan
+                    // Material Design menganjurkan bottom navigation hanya
+                    // diisi tujuan yang sering dipakai, sedangkan Pengaturan
+                    // jarang dibuka. Ikon gerigi di sini jalan masuknya.
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Buka pengaturan",
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -162,6 +189,8 @@ fun HomeScreen(
                     tasks = uiState.tasks,
                     onToggleDone = onToggleDone,
                     onDeleteTask = onDeleteTask,
+                    onTaskClick = onTaskClick,
+                    onStartFocus = onStartFocus,
                 )
             }
         }
@@ -215,6 +244,8 @@ private fun TaskList(
     tasks: List<Task>,
     onToggleDone: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
+    onTaskClick: (Long) -> Unit,
+    onStartFocus: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -233,6 +264,8 @@ private fun TaskList(
                 task = task,
                 onToggleDone = { onToggleDone(task) },
                 onDelete = { onDeleteTask(task) },
+                onClick = { onTaskClick(task.id) },
+                onStartFocus = { onStartFocus(task.id) },
             )
         }
     }
@@ -304,6 +337,7 @@ private fun HomeScreenPreview() {
                         title = "Rancang UI WaktuKu",
                         priority = TaskPriority.HIGH,
                         estimatedPomodoros = 4,
+                        completedPomodoros = 2,
                     ),
                     Task(
                         id = 2,
@@ -326,6 +360,9 @@ private fun HomeScreenPreview() {
             onToggleDone = {},
             onDeleteTask = {},
             onAddTask = { _, _ -> },
+            onTaskClick = {},
+            onStartFocus = {},
+            onOpenSettings = {},
         )
     }
 }
@@ -340,6 +377,9 @@ private fun HomeScreenEmptyPreview() {
             onToggleDone = {},
             onDeleteTask = {},
             onAddTask = { _, _ -> },
+            onTaskClick = {},
+            onStartFocus = {},
+            onOpenSettings = {},
         )
     }
 }

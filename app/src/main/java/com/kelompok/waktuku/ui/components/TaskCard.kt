@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,23 +45,35 @@ import java.util.Locale
  *
  * Perhatikan: fungsi ini STATELESS - ia tidak menyimpan apa pun dan tidak tahu
  * ada ViewModel. Ia hanya menerima data (`task`) dan melaporkan kejadian ke
- * atas lewat lambda (`onToggleDone`, `onDelete`). Pola ini bernama STATE
- * HOISTING, dan itulah sebabnya @Preview di bawah bisa jalan tanpa database.
+ * atas lewat lambda. Pola ini bernama STATE HOISTING, dan itulah sebabnya
+ * @Preview di bawah bisa jalan tanpa database.
+ *
+ * Kartu ini punya TIGA area sentuh yang berbeda, dan pembagiannya disengaja:
+ *   - kotak centang  -> menandai tugas selesai
+ *   - badan kartu    -> membuka layar Detail Tugas
+ *   - tombol fokus   -> langsung memulai sesi Pomodoro untuk tugas ini
  *
  * @param task tugas yang digambar.
  * @param onToggleDone dipanggil saat kotak centang ditekan.
  * @param onDelete dipanggil saat ikon tong sampah ditekan.
+ * @param onClick dipanggil saat badan kartu ditekan.
+ * @param onStartFocus dipanggil saat tombol mulai fokus ditekan.
  */
 @Composable
 fun TaskCard(
     task: Task,
     onToggleDone: () -> Unit,
     onDelete: () -> Unit,
+    onClick: () -> Unit,
+    onStartFocus: () -> Unit,
     // Modifier selalu jadi parameter opsional TERAKHIR dengan nilai bawaan
     // Modifier - ini konvensi resmi Compose agar komponen bisa diatur induknya.
     modifier: Modifier = Modifier,
 ) {
     Card(
+        // onClick dipasang di Card, bukan Modifier.clickable, supaya efek riak
+        // (ripple) dan perilaku aksesibilitasnya mengikuti bawaan Material 3.
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -77,7 +92,7 @@ fun TaskCard(
             )
 
             // weight(1f) membuat kolom teks memakan seluruh sisa ruang,
-            // sehingga ikon hapus tetap menempel di kanan.
+            // sehingga tombol-tombol tetap menempel di kanan.
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -110,6 +125,21 @@ fun TaskCard(
                 )
             }
 
+            // Tombol fokus disembunyikan pada tugas yang sudah selesai.
+            // Menawarkan "mulai fokus" untuk pekerjaan yang sudah rampung itu
+            // membingungkan, dan sesi yang tercatat di sana tidak ada gunanya.
+            if (!task.isDone) {
+                FilledTonalIconButton(
+                    onClick = onStartFocus,
+                    modifier = Modifier.size(40.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Mulai sesi fokus untuk ${task.title}",
+                    )
+                }
+            }
+
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -123,7 +153,7 @@ fun TaskCard(
 }
 
 /**
- * Menyusun baris keterangan kecil, contoh: "Tinggi - 12 Mar - 2 sesi".
+ * Menyusun baris keterangan kecil, contoh: "Tinggi - 12 Mar 2026 - 2/4 sesi".
  *
  * Fungsi bantu ini sengaja `private` dan bukan @Composable karena tugasnya
  * murni mengolah teks, tidak menggambar apa pun.
@@ -139,10 +169,13 @@ private fun buildMetaLabel(task: Task): String {
     }
 
     if (task.estimatedPomodoros > 0) {
-        parts += "${task.estimatedPomodoros} sesi"
+        // Ditulis sebagai pecahan "2/4 sesi", bukan sekadar "4 sesi", supaya
+        // pengguna langsung melihat berapa banyak fokus yang SUDAH ia curahkan
+        // untuk tugas ini - itulah inti pertanyaan yang dijawab WaktuKu.
+        parts += "${task.completedPomodoros}/${task.estimatedPomodoros} sesi"
     }
 
-    return parts.joinToString(" \u00B7 ")
+    return parts.joinToString(" · ")
 }
 
 // ---------------------------------------------------------------------------
@@ -150,7 +183,7 @@ private fun buildMetaLabel(task: Task): String {
 // aplikasi di emulator. Datanya dibuat manual di sini, bukan dari Room.
 // ---------------------------------------------------------------------------
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Sedang dikerjakan")
 @Composable
 private fun TaskCardPreview() {
     WaktuKuTheme {
@@ -161,28 +194,36 @@ private fun TaskCardPreview() {
                 notes = "Bab arsitektur MVVM dan pembagian tugas kelompok",
                 dueAt = 1772236800000L,
                 priority = TaskPriority.HIGH,
-                estimatedPomodoros = 3,
+                estimatedPomodoros = 4,
+                completedPomodoros = 2,
             ),
             onToggleDone = {},
             onDelete = {},
+            onClick = {},
+            onStartFocus = {},
             modifier = Modifier.padding(16.dp),
         )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Sudah selesai")
 @Composable
 private fun TaskCardDonePreview() {
     WaktuKuTheme {
         TaskCard(
+            // Tugas selesai: judul tercoret dan tombol fokus tidak muncul.
             task = Task(
                 id = 2,
                 title = "Baca dokumentasi Room",
                 isDone = true,
                 priority = TaskPriority.LOW,
+                estimatedPomodoros = 3,
+                completedPomodoros = 3,
             ),
             onToggleDone = {},
             onDelete = {},
+            onClick = {},
+            onStartFocus = {},
             modifier = Modifier.padding(16.dp),
         )
     }
