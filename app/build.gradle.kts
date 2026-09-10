@@ -40,6 +40,14 @@ android {
     }
 }
 
+// Room menuliskan struktur database sebagai berkas JSON ke folder ini setiap
+// kali build. Berkas itulah yang dipakai MigrationTest untuk membuat database
+// versi lama, lalu memastikan Migration kita benar-benar bekerja.
+// Folder schemas/ WAJIB ikut di-commit ke Git.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     // --- Compose (BOM mengunci semua versi artefak Compose agar sinkron) ---
     implementation(platform(libs.androidx.compose.bom))

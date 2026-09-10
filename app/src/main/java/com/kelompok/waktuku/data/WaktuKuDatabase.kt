@@ -18,13 +18,14 @@ import com.kelompok.waktuku.model.Task
  * @param entities  daftar tabel di dalam database ini.
  * @param version   dinaikkan setiap kali struktur tabel berubah. Kalau lupa
  *                  menaikkannya, aplikasi crash saat dibuka pengguna lama.
- * @param exportSchema  di-set false agar tidak perlu mengatur folder skema.
- *                  Untuk aplikasi yang sudah rilis ke publik, sebaiknya true.
+ * @param exportSchema  true agar Room menuliskan struktur database sebagai
+ *                  JSON ke folder schemas/. Berkas itu dipakai MigrationTest
+ *                  dan wajib ikut di-commit.
  */
 @Database(
     entities = [Task::class],
     version = 1,
-    exportSchema = false,
+    exportSchema = true,
 )
 @TypeConverters(TaskConverters::class)
 abstract class WaktuKuDatabase : RoomDatabase() {
