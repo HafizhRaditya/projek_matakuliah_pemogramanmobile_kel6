@@ -7,20 +7,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -28,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +52,7 @@ import com.kelompok.waktuku.ui.theme.WaktuKuTheme
 import com.kelompok.waktuku.ui.viewmodel.HomeUiState
 import com.kelompok.waktuku.ui.viewmodel.TaskFilter
 import com.kelompok.waktuku.ui.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 1 (UI/UX dengan Jetpack Compose)
@@ -86,7 +95,11 @@ fun HomeScreen(
         uiState = uiState,
         onFilterChange = viewModel::setFilter,
         onToggleDone = viewModel::toggleTaskDone,
-        onDeleteTask = viewModel::deleteTask,
+        // Menghapus dibagi tiga langkah supaya bisa diurungkan. Alasannya
+        // dijelaskan di TaskViewModel, bagian "MENGHAPUS TUGAS".
+        onDeleteTask = viewModel::markForDeletion,
+        onUndoDelete = viewModel::undoDeletion,
+        onDeleteConfirmed = viewModel::deleteTask,
         onAddTask = { title, priority -> viewModel.addTask(title = title, priority = priority) },
         // Tiga callback ini tidak menyentuh ViewModel sama sekali - mereka
         // hanya diteruskan ke atas, ke NavHost. Alasannya: berpindah layar
@@ -105,7 +118,9 @@ fun HomeScreen(
  * @param uiState potret kondisi layar saat ini (dari HomeUiState).
  * @param onFilterChange dilaporkan saat pengguna menekan chip penyaring.
  * @param onToggleDone dilaporkan saat kotak centang sebuah tugas ditekan.
- * @param onDeleteTask dilaporkan saat tugas dihapus.
+ * @param onDeleteTask dilaporkan saat ikon hapus ditekan; tugas disembunyikan.
+ * @param onUndoDelete dilaporkan saat pengguna menekan "Urungkan".
+ * @param onDeleteConfirmed dilaporkan saat Snackbar hilang tanpa diurungkan.
  * @param onAddTask dilaporkan saat tugas baru dikirim dari dialog.
  * @param onTaskClick dilaporkan saat badan kartu ditekan, membawa id tugas.
  * @param onStartFocus dilaporkan saat tombol mulai fokus ditekan.
@@ -118,6 +133,8 @@ fun HomeScreen(
     onFilterChange: (TaskFilter) -> Unit,
     onToggleDone: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
+    onUndoDelete: (Task) -> Unit,
+    onDeleteConfirmed: (Task) -> Unit,
     onAddTask: (String, TaskPriority) -> Unit,
     onTaskClick: (Long) -> Unit,
     onStartFocus: (Long) -> Unit,
@@ -130,10 +147,17 @@ fun HomeScreen(
     // TAMPILAN -> cukup di Composable.
     var showAddDialog by remember { mutableStateOf(false) }
 
+    // Snackbar juga state milik UI: ia hanya hidup selama layar ini tampil.
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     // Scaffold menyediakan kerangka baku Material Design: top bar, floating
     // action button, snackbar, dan area konten.
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        // Scaffold otomatis menaruh Snackbar di atas FAB, jadi keduanya
+        // tidak saling menutupi.
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("WaktuKu") },
@@ -188,7 +212,31 @@ fun HomeScreen(
                 else -> TaskList(
                     tasks = uiState.tasks,
                     onToggleDone = onToggleDone,
-                    onDeleteTask = onDeleteTask,
+                    onDeleteTask = { task ->
+                        // Langkah 1: minta ViewModel menyembunyikan tugas.
+                        onDeleteTask(task)
+                        // Langkah 2: tawarkan "Urungkan". showSnackbar()
+                        // menunggu sampai Snackbar hilang, lalu memberi tahu
+                        // apakah tombolnya ditekan.
+                        scope.launch {
+                            var diurungkan = false
+                            try {
+                                diurungkan = snackbarHostState.showSnackbar(
+                                    message = "\"${task.title}\" dihapus",
+                                    actionLabel = "Urungkan",
+                                    // Wajib ditulis: bila ada tombol aksi,
+                                    // bawaannya Indefinite (tidak pernah hilang
+                                    // sendiri) dan tugas tersembunyi selamanya.
+                                    duration = SnackbarDuration.Long,
+                                ) == SnackbarResult.ActionPerformed
+                            } finally {
+                                // Langkah 3. Ditaruh di finally supaya tetap
+                                // jalan walau layar ditinggalkan (misalnya
+                                // pindah tab) sebelum Snackbar selesai.
+                                if (diurungkan) onUndoDelete(task) else onDeleteConfirmed(task)
+                            }
+                        }
+                    },
                     onTaskClick = onTaskClick,
                     onStartFocus = onStartFocus,
                 )
@@ -224,10 +272,24 @@ private fun TaskFilterRow(
         // TaskFilter.entries menghasilkan semua nilai enum, sehingga menambah
         // filter baru cukup dilakukan di enum-nya - layar ini tidak diubah.
         TaskFilter.entries.forEach { filter ->
+            val terpilih = filter == selected
             FilterChip(
-                selected = filter == selected,
+                selected = terpilih,
                 onClick = { onFilterChange(filter) },
                 label = { Text(filter.label) },
+                // Centang di chip terpilih adalah penanda KEDUA selain warna,
+                // sehingga pengguna buta warna tetap tahu chip mana yang aktif.
+                leadingIcon = if (terpilih) {
+                    {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(FilterChipDefaults.IconSize),
+                        )
+                    }
+                } else {
+                    null
+                },
             )
         }
     }
@@ -359,6 +421,8 @@ private fun HomeScreenPreview() {
             onFilterChange = {},
             onToggleDone = {},
             onDeleteTask = {},
+            onUndoDelete = {},
+            onDeleteConfirmed = {},
             onAddTask = { _, _ -> },
             onTaskClick = {},
             onStartFocus = {},
@@ -376,6 +440,8 @@ private fun HomeScreenEmptyPreview() {
             onFilterChange = {},
             onToggleDone = {},
             onDeleteTask = {},
+            onUndoDelete = {},
+            onDeleteConfirmed = {},
             onAddTask = { _, _ -> },
             onTaskClick = {},
             onStartFocus = {},

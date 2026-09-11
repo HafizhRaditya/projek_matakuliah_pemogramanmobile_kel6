@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 // ============================================================================
@@ -49,8 +50,9 @@ data class HomeUiState(
     // Daftar yang SUDAH disaring - inilah yang digambar LazyColumn.
     val tasks: List<Task> = emptyList(),
     val filter: TaskFilter = TaskFilter.ALL,
-    // Dua angka di bawah dihitung dari SELURUH tugas (sebelum disaring),
-    // supaya ringkasan "3/10 selesai" tidak ikut berubah saat filter diganti.
+    // Dua angka di bawah dihitung dari seluruh tugas yang tampil (sebelum
+    // disaring filter), supaya ringkasan "3/10 selesai" tidak ikut berubah
+    // saat filter diganti.
     val totalCount: Int = 0,
     val doneCount: Int = 0,
     // true selama pembacaan pertama dari database belum selesai.
@@ -69,14 +71,21 @@ class TaskViewModel(
     // State internal yang hanya boleh diubah dari dalam ViewModel.
     private val _filter = MutableStateFlow(TaskFilter.ALL)
 
+    // Id tugas yang sedang "menunggu dihapus": sudah hilang dari layar, tetapi
+    // masih ada di database selama Snackbar "Urungkan" tampil. Dipakai Set,
+    // bukan satu id saja, karena pengguna bisa menghapus beberapa tugas
+    // beruntun sebelum Snackbar pertama hilang.
+    private val _pendingDeleteIds = MutableStateFlow<Set<Long>>(emptySet())
+
     /**
      * Satu-satunya state yang dibaca UI.
      *
-     * combine(...)  -> menggabungkan dua aliran (data dari Room + pilihan
-     *                  filter pengguna). Setiap kali SALAH SATU berubah,
-     *                  blok di dalamnya dijalankan ulang dan HomeUiState baru
-     *                  dipancarkan. Inilah alasan mencentang tugas langsung
-     *                  memperbarui layar tanpa satu baris pun kode refresh.
+     * combine(...)  -> menggabungkan tiga aliran (data dari Room, pilihan
+     *                  filter, dan tugas yang menunggu dihapus). Setiap kali
+     *                  SALAH SATU berubah, blok di dalamnya dijalankan ulang
+     *                  dan HomeUiState baru dipancarkan. Inilah alasan
+     *                  mencentang tugas langsung memperbarui layar tanpa satu
+     *                  baris pun kode refresh.
      *
      * stateIn(...)  -> mengubah Flow biasa menjadi StateFlow yang selalu punya
      *                  nilai terkini dan dibagikan ke semua pengamat (jadi
@@ -88,16 +97,24 @@ class TaskViewModel(
      *                  putus sehingga tidak ada pembacaan ulang yang sia-sia.
      */
     val uiState: StateFlow<HomeUiState> =
-        combine(taskRepository.observeTasks(), _filter) { allTasks, filter ->
+        combine(
+            taskRepository.observeTasks(),
+            _filter,
+            _pendingDeleteIds,
+        ) { allTasks, filter, pendingDeleteIds ->
+            // Tugas yang menunggu dihapus disingkirkan PALING AWAL, supaya
+            // daftar, ringkasan "x/y selesai", dan tampilan kosong semuanya
+            // sepakat bahwa tugas itu sudah tidak ada.
+            val visibleTasks = allTasks.filterNot { it.id in pendingDeleteIds }
             HomeUiState(
                 tasks = when (filter) {
-                    TaskFilter.ALL -> allTasks
-                    TaskFilter.ACTIVE -> allTasks.filterNot { it.isDone }
-                    TaskFilter.DONE -> allTasks.filter { it.isDone }
+                    TaskFilter.ALL -> visibleTasks
+                    TaskFilter.ACTIVE -> visibleTasks.filterNot { it.isDone }
+                    TaskFilter.DONE -> visibleTasks.filter { it.isDone }
                 },
                 filter = filter,
-                totalCount = allTasks.size,
-                doneCount = allTasks.count { it.isDone },
+                totalCount = visibleTasks.size,
+                doneCount = visibleTasks.count { it.isDone },
                 isLoading = false,
             )
         }.stateIn(
@@ -147,9 +164,37 @@ class TaskViewModel(
         }
     }
 
+    // ---------------------------------------------------------------------
+    // MENGHAPUS TUGAS DENGAN "URUNGKAN"
+    //
+    // Menghapus sengaja dibagi tiga langkah:
+    //   1. markForDeletion -> tugas disembunyikan dari layar
+    //   2. undoDeletion    -> pengguna menekan "Urungkan", tugas muncul lagi
+    //   3. deleteTask      -> Snackbar hilang, tugas BARU dihapus dari Room
+    //
+    // Kenapa tidak langsung dihapus, lalu dimasukkan ulang saat diurungkan?
+    // Karena tabel sesi Pomodoro memakai ON DELETE CASCADE: begitu tugas
+    // dihapus, seluruh riwayat sesinya ikut terhapus. Memasukkan ulang tugas
+    // tidak mengembalikan riwayat itu - datanya hilang diam-diam.
+    // ---------------------------------------------------------------------
+
+    /** Langkah 1: sembunyikan tugas, tetapi JANGAN hapus dari database dulu. */
+    fun markForDeletion(task: Task) {
+        _pendingDeleteIds.update { ids -> ids + task.id }
+    }
+
+    /** Langkah 2 (bila pengguna berubah pikiran): tampilkan tugas lagi. */
+    fun undoDeletion(task: Task) {
+        _pendingDeleteIds.update { ids -> ids - task.id }
+    }
+
+    /** Langkah 3: hapus permanen dari database. */
     fun deleteTask(task: Task) {
         viewModelScope.launch {
             taskRepository.deleteTask(task)
+            // Urutan ini penting: id baru dilepas SETELAH baris terhapus dari
+            // database. Kalau dibalik, tugas sempat muncul sekejap di layar.
+            _pendingDeleteIds.update { ids -> ids - task.id }
         }
     }
 

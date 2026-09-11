@@ -56,7 +56,7 @@ Status: seluruh kode di dokumen ini sudah diverifikasi lolos kompilasi
 |---|---|
 | `WaktuKuApplication.kt` | Kelas `Application`, pemilik `AppContainer` seumur hidup aplikasi |
 | `MainActivity.kt` | Satu-satunya Activity (pola *single-activity*) |
-| `ui/theme/` | `WaktuKuTheme`, warna, tipografi (Material 3 + dynamic color) |
+| `ui/theme/` | `WaktuKuTheme`, palet warna terang & gelap dari seed sage `#4E7D6B`, tipografi |
 
 ### Konfigurasi
 
@@ -185,6 +185,33 @@ apa pun tetap mendapat alasan, bukan sekadar tombol mati. Pesan pendukung juga
 selalu dirender - berisi petunjuk saat normal dan pesan kesalahan saat kosong -
 supaya tinggi dialog tidak melompat. Pola ini mengikuti materi kuliah
 Pertemuan 3 tentang Material Design 3 dan Form Components.
+
+**Palet warna diturunkan dari satu seed, dan dynamic color dimatikan.**
+Sebelumnya `dynamicColor = true` membuat Android 12+ mengganti semua warna
+dengan warna wallpaper, sehingga WaktuKu tampil berbeda di setiap HP dan tidak
+punya identitas. Sekarang 35 peran warna Material 3 (terang dan gelap)
+diturunkan dari seed sage `#4E7D6B` dengan algoritma warna M3 (ruang warna
+HCT). Setiap peran mengambil "nada" tertentu dari paletnya, dan selisih nada
+itulah yang menjamin teks terbaca: semua pasangan teks-latar yang diperiksa
+punya kontras minimal 4,98 : 1, di atas batas WCAG 4,5 : 1.
+
+**Menghapus tugas memakai "hapus tertunda" dan Snackbar Urungkan.**
+Tugas tidak langsung dihapus dari Room, tetapi disembunyikan dulu
+(`markForDeletion`). Baru setelah Snackbar hilang tanpa diurungkan, tugas
+benar-benar dihapus (`deleteTask`). Alasannya: tabel sesi Pomodoro memakai
+`ON DELETE CASCADE`, jadi menghapus lalu memasukkan ulang tugas akan
+menghilangkan seluruh riwayat sesinya secara diam-diam.
+
+**`consumeWindowInsets` di `WaktuKuApp`.**
+`Modifier.padding(innerPadding)` hanya menggeser isi; ia tidak memberi tahu
+layar di dalamnya bahwa tinggi status bar sudah diurus. Tanpa
+`consumeWindowInsets`, `TopAppBar` di setiap layar menambahkan tinggi status
+bar sekali lagi, sehingga muncul pita kosong di atas judul.
+
+**Ikon tab dari berkas Vector Asset, bukan `material-icons-extended`.**
+`material-icons-core` hanya berisi 49 ikon, tanpa ikon timer maupun diagram
+batang. Daripada menambah pustaka ikon lengkap yang ukurannya besar sekali,
+ikon yang dibutuhkan disimpan sebagai berkas XML di `res/drawable`.
 
 **Aturan pembatas antar anggota:**
 `TaskViewModel` tidak boleh mengimpor apa pun dari `androidx.compose.*`, dan
