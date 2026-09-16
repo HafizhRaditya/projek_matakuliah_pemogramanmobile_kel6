@@ -7,6 +7,8 @@ Proyek mata kuliah Pemrograman Mobile - Kelompok 6, Teknik Informatika.
 > - [PRD.md](PRD.md) - ruang lingkup MVP, user story, kriteria penerimaan, rencana 4 minggu
 > - [DOKUMENTASI.md](DOKUMENTASI.md) - penjelasan tiap file, diagram alur MVVM,
 >   alasan di balik setiap keputusan teknis, dan bahan tanya-jawab presentasi
+> - [docs/pembagian-tugas-uts.md](docs/pembagian-tugas-uts.md) - siapa memegang
+>   folder mana, sisa tugas tiap anggota, dan persiapan tanya jawab UTS
 
 ## Arsitektur
 
@@ -53,15 +55,19 @@ app/src/main/java/com/kelompok/waktuku/
 
 ## Pembagian tugas
 
-| Anggota | Lapisan | Folder yang disentuh |
-|---|---|---|
-| Mahasiswa 1 | UI/UX (Jetpack Compose) | `ui/screens`, `ui/components`, `ui/theme` |
-| Mahasiswa 2 | State & logika | `ui/viewmodel` |
-| Mahasiswa 3 | Local storage | `model`, `data` |
-| Mahasiswa 4 | Navigasi & integrasi sistem | `ui/navigation`, `notification`, `data/preferences` |
+| Kode | Anggota | NIM | Lapisan | Folder yang disentuh |
+|---|---|---|---|---|
+| Mahasiswa 1 | Hafizh Naufal Raditya | H1D024061 | UI/UX (Jetpack Compose) | `ui/screens`, `ui/components`, `ui/theme` |
+| Mahasiswa 2 | Biladi Amna | H1D024074 | State & logika | `ui/viewmodel` |
+| Mahasiswa 3 | Muhammad Abu Umar | H1D024084 | Local storage | `model`, `data` |
+| Mahasiswa 4 | Afkar Aufaa Farros | *menyusul* | Navigasi & integrasi sistem | `ui/navigation`, `notification`, `data/preferences` |
 
-Batas folder ini dipilih supaya empat orang bisa bekerja bersamaan tanpa
-menyunting file yang sama - konflik Git jadi minimal.
+Kode "Mahasiswa N" sama dengan komentar `PENANGGUNG JAWAB` di kepala setiap
+berkas. Batas folder ini dipilih supaya empat orang bisa bekerja bersamaan
+tanpa menyunting file yang sama - konflik Git jadi minimal.
+
+Sisa tugas tiap anggota ada di
+[docs/pembagian-tugas-uts.md](docs/pembagian-tugas-uts.md).
 
 ## Panduan untuk anggota kelompok
 
@@ -160,10 +166,15 @@ Atau buka folder ini di Android Studio, lalu tekan **Run**.
 
 ## Rencana berikutnya
 
-- [ ] Fitur Pomodoro: entity `PomodoroSession`, `PomodoroViewModel` (countdown berbasis Flow), `TimerScreen`
-- [ ] Navigasi antar layar dengan `NavHost`
+- [x] Navigasi antar layar dengan `NavHost`
+- [x] Lapisan data Pomodoro: entity `PomodoroSession` dan Migration 1→2
+- [ ] Timer Pomodoro: `PomodoroViewModel` dan `TimerScreen` (menunggu PR `feat/f3-timer`)
+- [ ] Unit test `TaskViewModel` (menunggu PR `design/tema-dan-perbaikan-ui`)
 - [ ] Notifikasi saat sesi Pomodoro selesai
-- [ ] Unit test `TaskViewModel` memakai `FakeTaskRepository`
+- [ ] Layar Detail Tugas, Statistik, dan Pengaturan
+
+Pembagian dan urutan pengerjaannya ada di
+[docs/pembagian-tugas-uts.md](docs/pembagian-tugas-uts.md).
 
 ## Catatan build (penting saat clone pertama kali)
 
