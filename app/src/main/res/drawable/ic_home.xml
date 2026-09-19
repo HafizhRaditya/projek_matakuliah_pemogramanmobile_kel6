@@ -1,0 +1,16 @@
+<!--
+    Ikon tab Beranda: rumah.
+    Bentuknya mengikuti ikon Material Icons "home" gaya Filled, yang juga
+    tersedia lewat New > Vector Asset > Clip Art di Android Studio.
+    Warna isian di sini tidak berpengaruh: komponen Icon di Compose mewarnai
+    ulang ikon sesuai tema.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M10,20v-6h4v6h5v-8h3L12,3 2,12h3v8z" />
+</vector>

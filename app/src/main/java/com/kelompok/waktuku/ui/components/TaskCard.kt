@@ -1,11 +1,16 @@
 package com.kelompok.waktuku.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
@@ -15,6 +20,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -118,11 +124,62 @@ fun TaskCard(
                     )
                 }
 
-                Text(
-                    text = buildMetaLabel(task),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                // Baris keterangan: lencana prioritas, lalu tenggat bila ada.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(top = 4.dp),
+                ) {
+                    PriorityBadge(task.priority)
+
+                    val dueText = buildDueDateLabel(task)
+                    if (dueText.isNotEmpty()) {
+                        Text(
+                            text = dueText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                // Progres sesi Pomodoro, hanya untuk tugas yang punya target.
+                if (task.estimatedPomodoros > 0) {
+                    // coerceIn(0f, 1f) menjaga bar tidak kebablasan saat sesi
+                    // yang selesai melebihi target (misalnya 5 dari 4 sesi).
+                    val progress = (task.completedPomodoros.toFloat() / task.estimatedPomodoros)
+                        .coerceIn(0f, 1f)
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        LinearProgressIndicator(
+                            // Lambda, bukan nilai langsung - bentuk yang dipakai
+                            // Material 3 versi baru. Ujung bar sudah membulat
+                            // dengan sendirinya, jadi tidak perlu clip().
+                            progress = { progress },
+                            modifier = Modifier
+                                .width(80.dp)
+                                .height(6.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            // trackColor sengaja tidak diisi. Warna jalur bawaan
+                            // M3 lebih redup; kalau diisi primaryContainer, di
+                            // mode gelap jalur kosong tampak seperti bar penuh.
+                        )
+                        // Tetap ditulis sebagai pecahan "2/4 sesi" di samping bar,
+                        // supaya pengguna tahu angka pastinya: berapa banyak fokus
+                        // yang SUDAH ia curahkan untuk tugas ini - itulah inti
+                        // pertanyaan yang dijawab WaktuKu.
+                        Text(
+                            text = "${task.completedPomodoros}/${task.estimatedPomodoros} sesi",
+                            // Ukuran huruf mengikuti skala tipografi tema, tidak
+                            // ditulis sendiri (slide 22: jangan fontSize hardcoded).
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
             }
 
             // Tombol fokus disembunyikan pada tugas yang sudah selesai.
@@ -153,29 +210,53 @@ fun TaskCard(
 }
 
 /**
- * Menyusun baris keterangan kecil, contoh: "Tinggi - 12 Mar 2026 - 2/4 sesi".
+ * Menyusun teks tenggat, contoh: "12 Mar 2026". Kosong bila tugas tanpa tenggat.
  *
  * Fungsi bantu ini sengaja `private` dan bukan @Composable karena tugasnya
  * murni mengolah teks, tidak menggambar apa pun.
  */
-private fun buildMetaLabel(task: Task): String {
-    val parts = mutableListOf(task.priority.label)
+private fun buildDueDateLabel(task: Task): String {
+    val millis = task.dueAt ?: return ""
+    // SimpleDateFormat dipakai (bukan java.time) karena minSdk proyek ini
+    // 24, sedangkan java.time baru tersedia mulai API 26.
+    val formatter = SimpleDateFormat("d MMM yyyy", Locale.forLanguageTag("id-ID"))
+    return formatter.format(Date(millis))
+}
 
-    task.dueAt?.let { millis ->
-        // SimpleDateFormat dipakai (bukan java.time) karena minSdk proyek ini
-        // 24, sedangkan java.time baru tersedia mulai API 26.
-        val formatter = SimpleDateFormat("d MMM yyyy", Locale.forLanguageTag("id-ID"))
-        parts += formatter.format(Date(millis))
+/**
+ * Lencana kecil berisi label prioritas.
+ *
+ * Warnanya diambil dari PASANGAN peran tema: latar ...Container dengan teks
+ * on...Container. Material 3 merancang pasangan ini agar kontrasnya selalu
+ * cukup, baik di mode terang maupun gelap.
+ *
+ * Teks "Tinggi / Sedang / Rendah" tetap ditulis walau sudah ada warna, karena
+ * informasi yang hanya dibedakan lewat warna tidak terbaca oleh pengguna buta
+ * warna.
+ */
+@Composable
+private fun PriorityBadge(priority: TaskPriority) {
+    val (backgroundColor, textColor) = when (priority) {
+        // Merah (error) khusus prioritas tinggi: warna yang paling menarik
+        // perhatian dipakai untuk hal yang paling mendesak.
+        TaskPriority.HIGH -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
+        TaskPriority.MEDIUM -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
+        TaskPriority.LOW -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
     }
 
-    if (task.estimatedPomodoros > 0) {
-        // Ditulis sebagai pecahan "2/4 sesi", bukan sekadar "4 sesi", supaya
-        // pengguna langsung melihat berapa banyak fokus yang SUDAH ia curahkan
-        // untuk tugas ini - itulah inti pertanyaan yang dijawab WaktuKu.
-        parts += "${task.completedPomodoros}/${task.estimatedPomodoros} sesi"
+    Box(
+        modifier = Modifier
+            // Sudut diambil dari skala bentuk tema (extraSmall = 4dp), bukan
+            // RoundedCornerShape yang ditulis sendiri.
+            .background(color = backgroundColor, shape = MaterialTheme.shapes.extraSmall)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    ) {
+        Text(
+            text = priority.label,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor,
+        )
     }
-
-    return parts.joinToString(" · ")
 }
 
 // ---------------------------------------------------------------------------

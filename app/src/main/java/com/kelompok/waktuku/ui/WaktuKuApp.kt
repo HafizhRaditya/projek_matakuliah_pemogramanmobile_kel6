@@ -1,5 +1,6 @@
 package com.kelompok.waktuku.ui
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -58,11 +59,18 @@ fun WaktuKuApp(modifier: Modifier = Modifier) {
             }
         },
     ) { innerPadding ->
-        // innerPadding berisi tinggi bilah bawah. Diteruskan ke NavHost supaya
-        // isi layar tidak tertutup bilah navigasi.
+        // innerPadding berisi tinggi bilah bawah DAN tinggi status bar di atas.
+        // Scaffold ini tidak punya topBar, jadi ia sendiri yang menyisihkan
+        // ruang untuk status bar.
         WaktuKuNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                // padding() hanya menggeser isi. consumeWindowInsets() yang
+                // memberi tahu layar di dalamnya bahwa ruang itu SUDAH diurus.
+                // Tanpa baris ini, TopAppBar di tiap layar menambahkan tinggi
+                // status bar sekali lagi dan muncul pita kosong di atas judul.
+                .consumeWindowInsets(innerPadding),
         )
     }
 }

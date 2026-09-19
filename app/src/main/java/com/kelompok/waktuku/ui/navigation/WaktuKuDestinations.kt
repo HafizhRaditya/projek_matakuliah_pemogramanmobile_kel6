@@ -1,10 +1,7 @@
 package com.kelompok.waktuku.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.DrawableRes
+import com.kelompok.waktuku.R
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 4 (Navigasi & Integrasi Sistem)
@@ -67,26 +64,30 @@ object WaktuKuRoutes {
 enum class TopLevelDestination(
     val route: String,
     val label: String,
-    val icon: ImageVector,
+    // Ikon disimpan sebagai berkas XML di res/drawable, bukan diambil dari
+    // pustaka material-icons-core. Pustaka itu hanya berisi 49 ikon dan tidak
+    // punya ikon timer maupun diagram batang. Menambah material-icons-extended
+    // demi dua ikon terlalu mahal karena ukurannya besar sekali.
+    // @param:DrawableRes membuat lint menolak angka yang bukan id drawable.
+    @param:DrawableRes val iconRes: Int,
 ) {
     BERANDA(
         route = WaktuKuRoutes.HOME,
         label = "Beranda",
-        icon = Icons.Default.Home,
+        iconRes = R.drawable.ic_home,
     ),
     FOKUS(
         // Memakai pola rute lengkap (dengan argumen opsional) supaya
         // pencocokan tab aktif tetap benar walau timer dibuka membawa taskId.
         route = WaktuKuRoutes.TIMER_ROUTE,
         label = "Fokus",
-        icon = Icons.Default.PlayArrow,
+        // Ikon jam henti menandakan TEMPAT (layar timer). Ini sengaja dibedakan
+        // dari ikon segitiga "mulai" di kartu tugas, yang menandakan AKSI.
+        iconRes = R.drawable.ic_timer,
     ),
     STATISTIK(
         route = WaktuKuRoutes.STATS,
         label = "Statistik",
-        // Ikon diagram batang hanya tersedia di material-icons-extended yang
-        // ukurannya besar. DateRange dipilih karena statistik WaktuKu memang
-        // berbasis rentang waktu (rekap 7 hari terakhir).
-        icon = Icons.Default.DateRange,
+        iconRes = R.drawable.ic_bar_chart,
     ),
 }

@@ -6,6 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 
@@ -37,7 +38,10 @@ fun WaktuKuBottomBar(
                 onClick = { onNavigate(destination) },
                 icon = {
                     Icon(
-                        imageVector = destination.icon,
+                        // painterResource membaca berkas vektor di res/drawable.
+                        // Warnanya tetap diatur tema: Icon mewarnai ulang ikon
+                        // sesuai status tab (aktif atau tidak).
+                        painter = painterResource(destination.iconRes),
                         // null karena label teksnya sudah tepat di bawah ikon,
                         // jadi pembaca layar tidak perlu membacanya dua kali.
                         contentDescription = null,
