@@ -17,7 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -40,8 +40,8 @@ import com.kelompok.waktuku.ui.theme.WaktuKuTheme
 //   leadingIcon            -> ikon penanda di sisi kiri field
 //
 // Catatan penting soal pembagian state:
-// Teks yang sedang DIKETIK pengguna disimpan di sini dengan `remember`, BUKAN
-// di ViewModel. Alasannya, teks setengah jadi belum berarti apa-apa bagi
+// Teks yang sedang DIKETIK pengguna disimpan di sini dengan `rememberSaveable`,
+// BUKAN di ViewModel. Alasannya, teks setengah jadi belum berarti apa-apa bagi
 // aplikasi - ia baru menjadi "data" setelah tombol Simpan ditekan. Kalau
 // setiap ketukan huruf dikirim ke ViewModel, kita membuat ViewModel bekerja
 // puluhan kali tanpa manfaat.
@@ -57,16 +57,27 @@ fun AddTaskDialog(
     onConfirm: (title: String, priority: TaskPriority) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // rememberSaveable tidak dipakai di sini karena dialog memang ditutup saat
-    // layar diputar. Kalau nanti isian ini ingin bertahan, ganti `remember`
-    // menjadi `rememberSaveable`.
-    var title by remember { mutableStateOf("") }
-    var priority by remember { mutableStateOf(TaskPriority.MEDIUM) }
+    // remember vs rememberSaveable:
+    //   remember          -> nilai bertahan saat recomposition, tetapi HILANG
+    //                        saat Activity dibuat ulang (layar diputar, mode
+    //                        gelap diganti, atau aplikasi dimatikan Android di
+    //                        latar belakang).
+    //   rememberSaveable  -> nilai juga disimpan ke Bundle milik Activity,
+    //                        sehingga tetap ada setelah Activity dibuat ulang.
+    // Tanpa rememberSaveable, pengguna yang memutar HP di tengah mengetik
+    // kehilangan judul yang sudah diketiknya.
+    //
+    // String, Boolean, dan enum (TaskPriority) bisa disimpan ke Bundle apa
+    // adanya, jadi tidak perlu Saver khusus.
+    var title by rememberSaveable { mutableStateOf("") }
+    var priority by rememberSaveable { mutableStateOf(TaskPriority.MEDIUM) }
 
     // Penanda apakah pengguna sudah pernah menyentuh field judul.
     // Tanpa penanda ini, pesan merah "tidak boleh kosong" akan langsung muncul
     // begitu dialog dibuka - padahal pengguna belum melakukan kesalahan apa pun.
-    var sudahDisentuh by remember { mutableStateOf(false) }
+    // Ikut disimpan, supaya pesan error yang sudah tampil tidak hilang begitu
+    // saja setelah layar diputar.
+    var sudahDisentuh by rememberSaveable { mutableStateOf(false) }
 
     val judulKosong = title.isBlank()
 

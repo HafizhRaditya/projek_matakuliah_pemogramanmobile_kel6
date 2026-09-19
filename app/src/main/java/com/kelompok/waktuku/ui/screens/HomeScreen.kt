@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -142,12 +143,20 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     // State milik UI semata (dialog sedang terbuka atau tidak) BOLEH disimpan
-    // di sini dengan remember, karena ViewModel tidak perlu tahu soal ini.
+    // di sini, karena ViewModel tidak perlu tahu soal ini.
     // Aturannya: state yang menyangkut DATA -> ViewModel; state yang murni
     // TAMPILAN -> cukup di Composable.
-    var showAddDialog by remember { mutableStateOf(false) }
+    //
+    // Dipakai rememberSaveable, bukan remember: saat HP diputar, Activity
+    // dibuat ulang dan `remember` kembali ke nilai awal, sehingga dialog yang
+    // sedang terbuka tiba-tiba tertutup. rememberSaveable menyimpan nilainya
+    // ke Bundle, jadi dialog tetap terbuka (dan isiannya tetap ada, lihat
+    // AddTaskDialog).
+    var showAddDialog by rememberSaveable { mutableStateOf(false) }
 
-    // Snackbar juga state milik UI: ia hanya hidup selama layar ini tampil.
+    // Snackbar juga state milik UI, tetapi cukup `remember`: SnackbarHostState
+    // bukan nilai sederhana yang bisa disimpan ke Bundle, dan pesan "dihapus"
+    // memang tidak perlu muncul lagi setelah layar diputar.
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
