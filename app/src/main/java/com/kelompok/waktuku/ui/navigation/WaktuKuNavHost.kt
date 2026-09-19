@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.kelompok.waktuku.ui.screens.HomeScreen
 import com.kelompok.waktuku.ui.screens.PlaceholderScreen
+import com.kelompok.waktuku.ui.screens.TimerScreen
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 4 (Navigasi & Integrasi Sistem)
@@ -79,18 +80,10 @@ fun WaktuKuNavHost(
                 ?.getLong(WaktuKuRoutes.ARG_TASK_ID)
                 ?: WaktuKuRoutes.NO_TASK_ID
 
-            // CATATAN UNTUK MAHASISWA 2 + 3 (fitur F3):
-            // Ganti baris di bawah dengan TimerScreen(taskId = taskId, ...).
-            PlaceholderScreen(
-                title = "Fokus",
-                penanggungJawab = "Mahasiswa 2 + 3",
-                keterangan = if (taskId == WaktuKuRoutes.NO_TASK_ID) {
-                    "Timer Pomodoro 25/5/15. Belum ada tugas yang dipilih - " +
-                        "nanti pengguna memilihnya dari kartu tugas di Beranda."
-                } else {
-                    "Timer Pomodoro untuk tugas dengan id $taskId."
-                },
-            )
+            // Layar Fokus sungguhan (F3). TimerScreen menerima taskId apa
+            // adanya - termasuk NO_TASK_ID saat dibuka dari tab Fokus tanpa
+            // memilih tugas, dan ia sendiri yang menampilkan penjelasannya.
+            TimerScreen(taskId = taskId)
         }
 
         // ------------------------------------------------------------------
