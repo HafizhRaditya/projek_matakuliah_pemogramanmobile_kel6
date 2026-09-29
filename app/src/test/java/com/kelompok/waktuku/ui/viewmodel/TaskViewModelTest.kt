@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 2 (State Management & Logika)
@@ -57,6 +59,12 @@ class TaskViewModelTest {
         Dispatchers.resetMain()
     }
 
+    /**
+     * uiState kini berbentuk sealed interface. Di uji-uji ini datanya pasti
+     * berhasil dimuat, jadi cukup diubah (cast) menjadi HomeUiState.Success.
+     */
+    private fun sukses() = viewModel.uiState.value as HomeUiState.Success
+
     @Test
     fun tandaiHapus_tugasHilangDariLayar_tetapiBelumDihapusDariDatabase() = runTest(dispatcher) {
         // uiState memakai WhileSubscribed, jadi harus ada yang mengamati
@@ -66,9 +74,9 @@ class TaskViewModelTest {
         viewModel.markForDeletion(laporan)
         advanceUntilIdle()
 
-        assertEquals(listOf(kuis), viewModel.uiState.value.tasks)
+        assertEquals(listOf(kuis), sukses().tasks)
         // Ringkasan "x/y selesai" juga tidak lagi menghitung tugas itu.
-        assertEquals(1, viewModel.uiState.value.totalCount)
+        assertEquals(1, sukses().totalCount)
         assertTrue(repository.dihapus.isEmpty())
     }
 
@@ -81,7 +89,7 @@ class TaskViewModelTest {
         viewModel.undoDeletion(laporan)
         advanceUntilIdle()
 
-        assertEquals(listOf(laporan, kuis), viewModel.uiState.value.tasks)
+        assertEquals(listOf(laporan, kuis), sukses().tasks)
         assertTrue(repository.dihapus.isEmpty())
     }
 
@@ -94,7 +102,29 @@ class TaskViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf(laporan), repository.dihapus)
-        assertEquals(listOf(kuis), viewModel.uiState.value.tasks)
+        assertEquals(listOf(kuis), sukses().tasks)
+    }
+
+    @Test
+    fun databaseGagalDibaca_tampilkanError() = runTest(dispatcher) {
+        // Repository palsu yang langsung melempar kesalahan saat dibaca,
+        // meniru database yang rusak atau penyimpanan yang penuh.
+        val rusak = object : TaskRepository by repository {
+            override fun observeTasks(): Flow<List<Task>> = flow { throw IOException("disk rusak") }
+        }
+        val viewModelRusak = TaskViewModel(rusak)
+        backgroundScope.launch { viewModelRusak.uiState.collect {} }
+        advanceUntilIdle()
+
+        // Aplikasi tidak crash; layar menerima pesan untuk ditampilkan.
+        assertTrue(viewModelRusak.uiState.value is HomeUiState.Error)
+    }
+
+    @Test
+    fun sebelumDataTiba_kondisinyaLoading() = runTest(dispatcher) {
+        // Belum ada yang mengamati dan belum ada waktu berlalu, jadi yang
+        // terlihat masih nilai awal dari stateIn.
+        assertEquals(HomeUiState.Loading, viewModel.uiState.value)
     }
 
     /**

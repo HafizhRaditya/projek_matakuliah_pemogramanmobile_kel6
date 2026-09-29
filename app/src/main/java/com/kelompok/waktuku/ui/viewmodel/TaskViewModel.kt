@@ -12,6 +12,7 @@ import com.kelompok.waktuku.model.TaskPriority
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -41,25 +42,38 @@ enum class TaskFilter(val label: String) {
 /**
  * Potret lengkap kondisi layar utama pada satu titik waktu.
  *
- * Sengaja dibuat SATU data class, bukan banyak StateFlow terpisah. Ini pola
- * "UI state as a single source of truth" yang dianjurkan panduan arsitektur
- * Google: mustahil muncul kondisi janggal seperti isLoading = true padahal
- * daftar tugas sudah terisi, karena keduanya selalu berubah bersamaan.
+ * Dibuat `sealed interface` dengan tiga kemungkinan: Loading, Success, dan
+ * Error. Kata "sealed" berarti daftar kemungkinannya tertutup - tidak ada
+ * kondisi keempat yang bisa dibuat di berkas lain. Akibatnya, saat layar
+ * memeriksa `when (uiState)`, compiler MEMAKSA ketiga kondisi ditangani.
+ * Lupa menulis tampilan untuk Error? Kode tidak akan ter-compile.
+ *
+ * Tetap SATU state, bukan banyak StateFlow terpisah. Ini pola "UI state as a
+ * single source of truth" yang dianjurkan panduan arsitektur Google:
+ * mustahil layar sedang Loading sekaligus menampilkan daftar tugas.
  */
-data class HomeUiState(
-    // Daftar yang SUDAH disaring - inilah yang digambar LazyColumn.
-    val tasks: List<Task> = emptyList(),
-    val filter: TaskFilter = TaskFilter.ALL,
-    // Dua angka di bawah dihitung dari seluruh tugas yang tampil (sebelum
-    // disaring filter), supaya ringkasan "3/10 selesai" tidak ikut berubah
-    // saat filter diganti.
-    val totalCount: Int = 0,
-    val doneCount: Int = 0,
-    // true selama pembacaan pertama dari database belum selesai.
-    val isLoading: Boolean = true,
-) {
-    /** Dipakai UI untuk memutuskan menampilkan daftar atau tampilan kosong. */
-    val isEmpty: Boolean get() = tasks.isEmpty() && !isLoading
+sealed interface HomeUiState {
+
+    /** Pembacaan pertama dari database belum selesai. */
+    data object Loading : HomeUiState
+
+    /** Data berhasil dimuat. Daftarnya boleh kosong. */
+    data class Success(
+        // Daftar yang SUDAH disaring - inilah yang digambar LazyColumn.
+        val tasks: List<Task>,
+        val filter: TaskFilter,
+        // Dua angka di bawah dihitung dari seluruh tugas yang tampil (sebelum
+        // disaring filter), supaya ringkasan "3/10 selesai" tidak ikut berubah
+        // saat filter diganti.
+        val totalCount: Int,
+        val doneCount: Int,
+    ) : HomeUiState {
+        /** Dipakai UI untuk memutuskan menampilkan daftar atau tampilan kosong. */
+        val isEmpty: Boolean get() = tasks.isEmpty()
+    }
+
+    /** Database gagal dibaca. Pesannya ditampilkan apa adanya di layar. */
+    data class Error(val message: String) : HomeUiState
 }
 
 class TaskViewModel(
@@ -87,6 +101,10 @@ class TaskViewModel(
      *                  mencentang tugas langsung memperbarui layar tanpa satu
      *                  baris pun kode refresh.
      *
+     * catch(...)    -> menangkap kegagalan saat membaca database, lalu
+     *                  mengubahnya menjadi HomeUiState.Error. Tanpa ini,
+     *                  satu kesalahan baca membuat aplikasi tertutup paksa.
+     *
      * stateIn(...)  -> mengubah Flow biasa menjadi StateFlow yang selalu punya
      *                  nilai terkini dan dibagikan ke semua pengamat (jadi
      *                  database tidak dibaca berkali-kali).
@@ -97,7 +115,10 @@ class TaskViewModel(
      *                  putus sehingga tidak ada pembacaan ulang yang sia-sia.
      */
     val uiState: StateFlow<HomeUiState> =
-        combine(
+        // Tipe <..., HomeUiState> ditulis eksplisit supaya hasil combine
+        // bertipe HomeUiState, bukan HomeUiState.Success. Tanpanya, catch di
+        // bawah tidak bisa memancarkan HomeUiState.Error.
+        combine<List<Task>, TaskFilter, Set<Long>, HomeUiState>(
             taskRepository.observeTasks(),
             _filter,
             _pendingDeleteIds,
@@ -106,7 +127,7 @@ class TaskViewModel(
             // daftar, ringkasan "x/y selesai", dan tampilan kosong semuanya
             // sepakat bahwa tugas itu sudah tidak ada.
             val visibleTasks = allTasks.filterNot { it.id in pendingDeleteIds }
-            HomeUiState(
+            HomeUiState.Success(
                 tasks = when (filter) {
                     TaskFilter.ALL -> visibleTasks
                     TaskFilter.ACTIVE -> visibleTasks.filterNot { it.isDone }
@@ -115,14 +136,15 @@ class TaskViewModel(
                 filter = filter,
                 totalCount = visibleTasks.size,
                 doneCount = visibleTasks.count { it.isDone },
-                isLoading = false,
             )
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            // Nilai awal sebelum database sempat menjawab.
-            initialValue = HomeUiState(isLoading = true),
-        )
+        }
+            .catch { emit(HomeUiState.Error("Gagal memuat daftar tugas. Coba buka ulang aplikasi.")) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                // Nilai awal sebelum database sempat menjawab.
+                initialValue = HomeUiState.Loading,
+            )
 
     // ---------------------------------------------------------------------
     // AKSI PENGGUNA
