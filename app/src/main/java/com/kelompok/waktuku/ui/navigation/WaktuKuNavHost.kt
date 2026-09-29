@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.kelompok.waktuku.ui.screens.HomeScreen
 import com.kelompok.waktuku.ui.screens.PlaceholderScreen
+import com.kelompok.waktuku.ui.screens.TaskDetailScreen
 import com.kelompok.waktuku.ui.screens.TimerScreen
 
 // ============================================================================
@@ -91,17 +92,14 @@ fun WaktuKuNavHost(
         // ------------------------------------------------------------------
         // DETAIL TUGAS - argumen taskId WAJIB
         // ------------------------------------------------------------------
-        composable<TaskDetailRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<TaskDetailRoute>()
-
-            // CATATAN UNTUK MAHASISWA 1 + 3 (fitur F5):
-            PlaceholderScreen(
-                title = "Detail Tugas",
-                penanggungJawab = "Mahasiswa 1 + 3",
-                keterangan = "Ubah judul, catatan, prioritas, tenggat, dan " +
-                    "target sesi untuk tugas dengan id ${route.taskId}.",
+        composable<TaskDetailRoute> {
+            // Tidak ada taskId yang diteruskan di sini. TaskDetailViewModel
+            // membacanya sendiri dari SavedStateHandle, yang diisi otomatis
+            // oleh Navigation dengan argumen TaskDetailRoute.
+            TaskDetailScreen(
                 // Layar ini dicapai dari Beranda, bukan dari tab, jadi ia
-                // butuh tombol kembali.
+                // butuh jalan kembali. Dipanggil juga setelah tugas disimpan
+                // atau dihapus.
                 onBack = { navController.popBackStack() },
             )
         }
