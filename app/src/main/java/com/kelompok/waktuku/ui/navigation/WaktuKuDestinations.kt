@@ -2,54 +2,59 @@ package com.kelompok.waktuku.ui.navigation
 
 import androidx.annotation.DrawableRes
 import com.kelompok.waktuku.R
+import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 4 (Navigasi & Integrasi Sistem)
 // ============================================================================
-// Daftar seluruh alamat layar di WaktuKu.
+// Daftar seluruh alamat layar di WaktuKu, memakai TYPE-SAFE NAVIGATION.
 //
-// Kenapa rute dikumpulkan di satu berkas dan bukan ditulis sebagai teks biasa
-// di tempat masing-masing? Karena rute adalah teks, dan teks itu tidak dicek
-// oleh compiler. Kalau di satu tempat ditulis "home" lalu di tempat lain
-// "Home", aplikasi tetap ter-compile tapi crash saat dijalankan. Dengan
-// dikumpulkan di sini, salah ketik langsung ketahuan sebagai error merah.
+// Sebelumnya rute ditulis sebagai teks, misalnya "task/{taskId}". Masalah rute
+// teks: compiler tidak memeriksanya. Salah ketik "taks/5", lupa mengirim
+// argumen, atau mengirim teks ke argumen bertipe angka, semuanya lolos build
+// lalu crash saat aplikasi dijalankan.
+//
+// Dengan type-safe navigation, setiap rute adalah KELAS Kotlin:
+//   - rute tanpa argumen  -> `data object`, contoh HomeRoute
+//   - rute dengan argumen -> `data class`,  contoh TaskDetailRoute(taskId)
+// Anotasi @Serializable membuat Navigation bisa mengubah objek ini menjadi
+// alamat dan sebaliknya. Kesalahan tipe kini ketahuan saat compile, bukan
+// saat aplikasi sudah di tangan pengguna.
 // ============================================================================
 
-object WaktuKuRoutes {
+/** Nilai penanda "tidak ada tugas yang dipilih". */
+const val NO_TASK_ID = -1L
 
-    // --- Rute tanpa argumen ---
-    const val HOME = "home"
-    const val STATS = "stats"
-    const val SETTINGS = "settings"
+/** Beranda: daftar tugas. */
+@Serializable
+data object HomeRoute
 
-    // --- Nama argumen ---
-    const val ARG_TASK_ID = "taskId"
+/**
+ * Layar Fokus (timer Pomodoro).
+ *
+ * taskId punya nilai bawaan, artinya argumen ini OPSIONAL. Layar Fokus bisa
+ * dibuka dari tab Fokus tanpa memilih tugas (TimerRoute()), atau dari tombol
+ * mulai di kartu tugas (TimerRoute(taskId = 5)).
+ */
+@Serializable
+data class TimerRoute(val taskId: Long = NO_TASK_ID)
 
-    /** Nilai penanda "tidak ada tugas yang dipilih". */
-    const val NO_TASK_ID = -1L
+/**
+ * Detail Tugas. taskId WAJIB, karena layar ini tidak berarti apa-apa tanpa
+ * tugas yang dibuka. Nama propertinya "taskId" juga menjadi kunci yang dibaca
+ * TaskDetailViewModel dari SavedStateHandle.
+ */
+@Serializable
+data class TaskDetailRoute(val taskId: Long)
 
-    // --- Rute dengan argumen ---
-    // Pola penulisan Navigation Compose:
-    //   {argumen}   -> argumen WAJIB, contoh "task/5"
-    //   ?nama={...} -> argumen OPSIONAL, contoh "timer" atau "timer?taskId=5"
-    //
-    // Timer memakai argumen opsional karena layar itu bisa dibuka lewat dua
-    // jalan: dari tab Fokus (belum memilih tugas) atau dari kartu tugas di
-    // Beranda (sudah membawa tugas tertentu).
-    const val TIMER_ROUTE = "timer?$ARG_TASK_ID={$ARG_TASK_ID}"
-    const val TASK_DETAIL_ROUTE = "task/{$ARG_TASK_ID}"
+/** Statistik. */
+@Serializable
+data object StatsRoute
 
-    /**
-     * Membangun alamat layar Timer.
-     *
-     * Fungsi pembangun seperti ini mencegah kesalahan merangkai teks secara
-     * manual di banyak tempat. Cukup panggil `WaktuKuRoutes.timer(task.id)`.
-     */
-    fun timer(taskId: Long = NO_TASK_ID): String = "timer?$ARG_TASK_ID=$taskId"
-
-    /** Membangun alamat layar Detail Tugas. */
-    fun taskDetail(taskId: Long): String = "task/$taskId"
-}
+/** Pengaturan. */
+@Serializable
+data object SettingsRoute
 
 /**
  * Tiga tujuan utama yang muncul sebagai tab di bottom navigation.
@@ -60,9 +65,15 @@ object WaktuKuRoutes {
  * Catatan: Pengaturan sengaja TIDAK dijadikan tab. Panduan Material Design
  * menganjurkan bottom navigation hanya diisi 3-5 tujuan yang sering dipakai,
  * sedangkan Pengaturan jarang dibuka. Ia dicapai lewat ikon gerigi di TopAppBar.
+ *
+ * @param route objek rute yang dituju saat tab ditekan.
+ * @param routeClass kelas rute, dipakai untuk mengecek tab mana yang aktif.
+ *        Yang dicocokkan kelasnya, bukan objeknya: tab Fokus harus tetap
+ *        tersorot baik saat dibuka dengan TimerRoute() maupun TimerRoute(5).
  */
 enum class TopLevelDestination(
-    val route: String,
+    val route: Any,
+    val routeClass: KClass<*>,
     val label: String,
     // Ikon disimpan sebagai berkas XML di res/drawable, bukan diambil dari
     // pustaka material-icons-core. Pustaka itu hanya berisi 49 ikon dan tidak
@@ -72,21 +83,23 @@ enum class TopLevelDestination(
     @param:DrawableRes val iconRes: Int,
 ) {
     BERANDA(
-        route = WaktuKuRoutes.HOME,
+        route = HomeRoute,
+        routeClass = HomeRoute::class,
         label = "Beranda",
         iconRes = R.drawable.ic_home,
     ),
     FOKUS(
-        // Memakai pola rute lengkap (dengan argumen opsional) supaya
-        // pencocokan tab aktif tetap benar walau timer dibuka membawa taskId.
-        route = WaktuKuRoutes.TIMER_ROUTE,
+        // Dibuka dari tab berarti belum memilih tugas.
+        route = TimerRoute(),
+        routeClass = TimerRoute::class,
         label = "Fokus",
         // Ikon jam henti menandakan TEMPAT (layar timer). Ini sengaja dibedakan
         // dari ikon segitiga "mulai" di kartu tugas, yang menandakan AKSI.
         iconRes = R.drawable.ic_timer,
     ),
     STATISTIK(
-        route = WaktuKuRoutes.STATS,
+        route = StatsRoute,
+        routeClass = StatsRoute::class,
         label = "Statistik",
         iconRes = R.drawable.ic_bar_chart,
     ),

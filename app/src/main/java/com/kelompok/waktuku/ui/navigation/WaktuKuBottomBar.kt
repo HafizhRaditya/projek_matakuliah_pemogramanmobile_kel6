@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 
 // ============================================================================
@@ -59,11 +60,14 @@ fun WaktuKuBottomBar(
 /**
  * Memeriksa apakah tab ini sedang aktif.
  *
- * Memakai `hierarchy`, bukan sekadar membandingkan `route` secara langsung.
+ * Memakai `hierarchy`, bukan sekadar memeriksa tujuan saat ini saja.
  * Alasannya: `hierarchy` menelusuri tujuan saat ini beserta seluruh induknya
  * di dalam grafik navigasi. Jadi kalau nanti tab Fokus dikembangkan menjadi
  * beberapa layar bersarang, tabnya tetap tersorot dengan benar - tidak perlu
  * mengubah kode ini lagi.
+ *
+ * `hasRoute` mencocokkan KELAS rute (misalnya TimerRoute::class), bukan isi
+ * argumennya. Tab Fokus tetap tersorot walau dibuka membawa taskId.
  */
 private fun NavDestination?.isOn(destination: TopLevelDestination): Boolean =
-    this?.hierarchy?.any { it.route == destination.route } == true
+    this?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true

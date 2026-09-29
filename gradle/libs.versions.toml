@@ -70,3 +70,7 @@ androidx-room-testing = { group = "androidx.room", name = "room-testing", versio
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+# Plugin compiler kotlinx.serialization. Dibutuhkan type-safe navigation:
+# setiap rute (@Serializable) diubah menjadi alamat dan sebaliknya.
+# Versinya WAJIB sama dengan versi Kotlin.
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

@@ -4,6 +4,9 @@ plugins {
     // KSP wajib diaktifkan agar anotasi Room (@Entity, @Dao, @Database)
     // diproses menjadi kode nyata saat build.
     alias(libs.plugins.ksp)
+    // Type-safe navigation: rute ditulis sebagai kelas @Serializable,
+    // bukan teks "task/{taskId}" yang tidak diperiksa compiler.
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
