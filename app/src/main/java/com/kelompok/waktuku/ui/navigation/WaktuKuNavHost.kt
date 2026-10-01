@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.kelompok.waktuku.ui.screens.HomeScreen
-import com.kelompok.waktuku.ui.screens.PlaceholderScreen
 import com.kelompok.waktuku.ui.screens.TaskDetailScreen
 import com.kelompok.waktuku.ui.screens.TimerScreen
 
@@ -23,6 +22,10 @@ import com.kelompok.waktuku.ui.screens.TimerScreen
 // dan perpindahan layar ditulis sebagai
 //     navController.navigate(TaskDetailRoute(taskId = 5))
 // Tidak ada lagi teks rute yang dirangkai manual.
+//
+// Peta ini memuat tiga layar: Beranda, Fokus, dan Detail Tugas. Layar
+// Statistik dan Pengaturan ditunda sampai setelah UTS (lihat PRD bagian 9),
+// jadi rutenya belum didaftarkan di sini.
 //
 // Perhatikan bahwa NavHost tidak memuat TopAppBar maupun bottom bar. Kerangka
 // itu berada di WaktuKuApp.kt, satu tingkat di atas, supaya bilah bawah tidak
@@ -59,9 +62,6 @@ fun WaktuKuNavHost(
                 onStartFocus = { taskId ->
                     navController.navigate(TimerRoute(taskId = taskId))
                 },
-                onOpenSettings = {
-                    navController.navigate(SettingsRoute)
-                },
             )
         }
 
@@ -77,19 +77,6 @@ fun WaktuKuNavHost(
         }
 
         // ------------------------------------------------------------------
-        // STATISTIK
-        // ------------------------------------------------------------------
-        composable<StatsRoute> {
-            // CATATAN UNTUK MAHASISWA 3 + 1 (fitur F6):
-            PlaceholderScreen(
-                title = "Statistik",
-                penanggungJawab = "Mahasiswa 3 + 1",
-                keterangan = "Total sesi dan menit fokus hari ini, diagram " +
-                    "batang 7 hari terakhir, serta jumlah tugas selesai minggu ini.",
-            )
-        }
-
-        // ------------------------------------------------------------------
         // DETAIL TUGAS - argumen taskId WAJIB
         // ------------------------------------------------------------------
         composable<TaskDetailRoute> {
@@ -100,20 +87,6 @@ fun WaktuKuNavHost(
                 // Layar ini dicapai dari Beranda, bukan dari tab, jadi ia
                 // butuh jalan kembali. Dipanggil juga setelah tugas disimpan
                 // atau dihapus.
-                onBack = { navController.popBackStack() },
-            )
-        }
-
-        // ------------------------------------------------------------------
-        // PENGATURAN
-        // ------------------------------------------------------------------
-        composable<SettingsRoute> {
-            // CATATAN UNTUK MAHASISWA 4 + 1 (fitur F7):
-            PlaceholderScreen(
-                title = "Pengaturan",
-                penanggungJawab = "Mahasiswa 4 + 1",
-                keterangan = "Durasi fokus dan istirahat, mode gelap, serta " +
-                    "sakelar notifikasi. Nilainya disimpan memakai DataStore.",
                 onBack = { navController.popBackStack() },
             )
         }

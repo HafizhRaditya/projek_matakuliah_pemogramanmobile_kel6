@@ -41,9 +41,9 @@ fun WaktuKuApp(modifier: Modifier = Modifier) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
-    // Bilah bawah hanya muncul di tiga tujuan utama. Di layar Detail Tugas dan
-    // Pengaturan ia disembunyikan, karena keduanya adalah layar "masuk lebih
-    // dalam" yang jalan keluarnya lewat tombol kembali, bukan pindah tab.
+    // Bilah bawah hanya muncul di tujuan utama (Beranda dan Fokus). Di layar
+    // Detail Tugas ia disembunyikan, karena itu layar "masuk lebih dalam"
+    // yang jalan keluarnya lewat tombol kembali, bukan pindah tab.
     // hasRoute mencocokkan KELAS rute, jadi tab Fokus tetap dikenali baik saat
     // dibuka dengan TimerRoute() maupun TimerRoute(taskId = 5).
     val tampilkanBottomBar = TopLevelDestination.entries.any { destination ->

@@ -14,7 +14,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 4 (Navigasi & Integrasi Sistem)
 // ============================================================================
-// Bilah navigasi bawah berisi tiga tab: Beranda, Fokus, Statistik.
+// Bilah navigasi bawah berisi dua tab: Beranda dan Fokus.
 //
 // Komponen ini STATELESS - ia tidak memegang NavController dan tidak tahu cara
 // berpindah layar. Ia hanya menerima "tujuan mana yang sedang aktif" lalu
