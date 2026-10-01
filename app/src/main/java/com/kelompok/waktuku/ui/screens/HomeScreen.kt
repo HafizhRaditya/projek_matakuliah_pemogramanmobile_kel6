@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -171,12 +172,17 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("WaktuKu") },
                 actions = {
-                    // Ringkasan progres, contoh: "1/3 selesai".
-                    Text(
-                        text = "${uiState.doneCount}/${uiState.totalCount} selesai",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    // Ringkasan progres, contoh: "1/3 selesai". Hanya ada
+                    // angkanya bila data berhasil dimuat. `is` sekaligus
+                    // melakukan smart cast: di dalam if ini, uiState dianggap
+                    // HomeUiState.Success sehingga doneCount bisa dibaca.
+                    if (uiState is HomeUiState.Success) {
+                        Text(
+                            text = "${uiState.doneCount}/${uiState.totalCount} selesai",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     // Pengaturan sengaja TIDAK dijadikan tab di bawah. Panduan
                     // Material Design menganjurkan bottom navigation hanya
                     // diisi tujuan yang sering dipakai, sedangkan Pengaturan
@@ -205,21 +211,20 @@ fun HomeScreen(
         // top bar dan navigation bar.
         Column(modifier = Modifier.padding(innerPadding)) {
 
-            TaskFilterRow(
-                selected = uiState.filter,
-                onFilterChange = onFilterChange,
-            )
-
-            when {
+            // Tiga kondisi dari HomeUiState. Karena HomeUiState adalah sealed
+            // interface, `when` ini wajib menangani ketiganya - lupa satu,
+            // kode tidak ter-compile.
+            when (uiState) {
                 // Kondisi 1: database belum sempat menjawab.
-                uiState.isLoading -> LoadingState()
+                HomeUiState.Loading -> LoadingState()
 
-                // Kondisi 2: sudah dimuat, tapi tidak ada tugas untuk ditampilkan.
-                uiState.isEmpty -> EmptyState(filter = uiState.filter)
+                // Kondisi 2: database gagal dibaca.
+                is HomeUiState.Error -> ErrorState(message = uiState.message)
 
-                // Kondisi 3: ada isinya - gambar daftarnya.
-                else -> TaskList(
-                    tasks = uiState.tasks,
+                // Kondisi 3: data berhasil dimuat.
+                is HomeUiState.Success -> SuccessContent(
+                    uiState = uiState,
+                    onFilterChange = onFilterChange,
                     onToggleDone = onToggleDone,
                     onDeleteTask = { task ->
                         // Langkah 1: minta ViewModel menyembunyikan tugas.
@@ -262,6 +267,40 @@ fun HomeScreen(
                 showAddDialog = false
             },
         )
+    }
+}
+
+/**
+ * Isi layar saat data berhasil dimuat: chip penyaring, lalu daftar tugas atau
+ * tampilan kosong.
+ */
+@Composable
+private fun SuccessContent(
+    uiState: HomeUiState.Success,
+    onFilterChange: (TaskFilter) -> Unit,
+    onToggleDone: (Task) -> Unit,
+    onDeleteTask: (Task) -> Unit,
+    onTaskClick: (Long) -> Unit,
+    onStartFocus: (Long) -> Unit,
+) {
+    Column {
+        TaskFilterRow(
+            selected = uiState.filter,
+            onFilterChange = onFilterChange,
+        )
+
+        if (uiState.isEmpty) {
+            // Sudah dimuat, tapi tidak ada tugas untuk ditampilkan.
+            EmptyState(filter = uiState.filter)
+        } else {
+            TaskList(
+                tasks = uiState.tasks,
+                onToggleDone = onToggleDone,
+                onDeleteTask = onDeleteTask,
+                onTaskClick = onTaskClick,
+                onStartFocus = onStartFocus,
+            )
+        }
     }
 }
 
@@ -390,6 +429,37 @@ private fun EmptyState(filter: TaskFilter, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Tampilan saat database gagal dibaca.
+ *
+ * Tanpa layar ini, kegagalan membaca database membuat aplikasi tertutup paksa.
+ * Warna error diambil dari tema, sehingga tetap terbaca di mode terang
+ * maupun gelap.
+ */
+@Composable
+private fun ErrorState(message: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = null,
+            modifier = Modifier.padding(bottom = 16.dp),
+            tint = MaterialTheme.colorScheme.error,
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
 // ---------------------------------------------------------------------------
 // PREVIEW
 // Karena versi stateless menerima HomeUiState buatan, seluruh tampilan bisa
@@ -401,7 +471,8 @@ private fun EmptyState(filter: TaskFilter, modifier: Modifier = Modifier) {
 private fun HomeScreenPreview() {
     WaktuKuTheme {
         HomeScreen(
-            uiState = HomeUiState(
+            uiState = HomeUiState.Success(
+                filter = TaskFilter.ALL,
                 tasks = listOf(
                     Task(
                         id = 1,
@@ -425,7 +496,6 @@ private fun HomeScreenPreview() {
                 ),
                 totalCount = 3,
                 doneCount = 1,
-                isLoading = false,
             ),
             onFilterChange = {},
             onToggleDone = {},
@@ -445,7 +515,31 @@ private fun HomeScreenPreview() {
 private fun HomeScreenEmptyPreview() {
     WaktuKuTheme {
         HomeScreen(
-            uiState = HomeUiState(isLoading = false),
+            uiState = HomeUiState.Success(
+                tasks = emptyList(),
+                filter = TaskFilter.ALL,
+                totalCount = 0,
+                doneCount = 0,
+            ),
+            onFilterChange = {},
+            onToggleDone = {},
+            onDeleteTask = {},
+            onUndoDelete = {},
+            onDeleteConfirmed = {},
+            onAddTask = { _, _ -> },
+            onTaskClick = {},
+            onStartFocus = {},
+            onOpenSettings = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Gagal memuat")
+@Composable
+private fun HomeScreenErrorPreview() {
+    WaktuKuTheme {
+        HomeScreen(
+            uiState = HomeUiState.Error("Gagal memuat daftar tugas. Coba buka ulang aplikasi."),
             onFilterChange = {},
             onToggleDone = {},
             onDeleteTask = {},
