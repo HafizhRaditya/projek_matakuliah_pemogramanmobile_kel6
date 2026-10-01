@@ -7,6 +7,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -15,7 +16,6 @@ import androidx.navigation.compose.rememberNavController
 import com.kelompok.waktuku.ui.navigation.TopLevelDestination
 import com.kelompok.waktuku.ui.navigation.WaktuKuBottomBar
 import com.kelompok.waktuku.ui.navigation.WaktuKuNavHost
-import com.kelompok.waktuku.ui.navigation.WaktuKuRoutes
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 4 (Navigasi & Integrasi Sistem)
@@ -44,8 +44,10 @@ fun WaktuKuApp(modifier: Modifier = Modifier) {
     // Bilah bawah hanya muncul di tiga tujuan utama. Di layar Detail Tugas dan
     // Pengaturan ia disembunyikan, karena keduanya adalah layar "masuk lebih
     // dalam" yang jalan keluarnya lewat tombol kembali, bukan pindah tab.
+    // hasRoute mencocokkan KELAS rute, jadi tab Fokus tetap dikenali baik saat
+    // dibuka dengan TimerRoute() maupun TimerRoute(taskId = 5).
     val tampilkanBottomBar = TopLevelDestination.entries.any { destination ->
-        currentDestination?.hierarchy?.any { it.route == destination.route } == true
+        currentDestination?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
     }
 
     Scaffold(
@@ -96,16 +98,10 @@ fun WaktuKuApp(modifier: Modifier = Modifier) {
  */
 private fun NavHostController.navigateToTab(destination: TopLevelDestination) {
 
-    // Tab Fokus perlu perlakuan khusus. Nilai `route` miliknya adalah POLA
-    // alamat ("timer?taskId={taskId}") yang dipakai untuk mencocokkan tab
-    // aktif, bukan alamat yang bisa dituju. Alamat sesungguhnya dibangun lewat
-    // WaktuKuRoutes.timer() tanpa argumen, artinya "belum memilih tugas".
-    val route = when (destination) {
-        TopLevelDestination.FOKUS -> WaktuKuRoutes.timer()
-        else -> destination.route
-    }
-
-    navigate(route) {
+    // destination.route adalah objek rute, misalnya HomeRoute atau
+    // TimerRoute(). Dengan type-safe navigation tidak perlu lagi membedakan
+    // "pola alamat" dan "alamat tujuan" seperti saat rute masih berupa teks.
+    navigate(destination.route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
