@@ -1,7 +1,8 @@
 # Pembagian Tugas Menuju UTS
 
 **Kelompok 6 · WaktuKu** · keadaan per 16 September 2026, diperbarui
-17 September 2026 dengan ketentuan teknis project dari dosen (bagian 3)
+17 September 2026 dengan ketentuan teknis project dari dosen (bagian 3), dan
+1 Oktober 2026 dengan keputusan lingkup UTS (bagian 3, "Status 1 Oktober 2026")
 
 Dokumen ini menjawab tiga hal: siapa memegang bagian mana, apa yang masih
 harus dikerjakan, dan apa yang harus dikuasai tiap orang saat ditanya dosen.
@@ -17,24 +18,24 @@ harus dikerjakan, dan apa yang harus dikuasai tiap orang saat ditanya dosen.
 | **M3** | Muhammad Abu Umar | H1D024084 | Penyimpanan lokal (Room) | `model/`, `data/`, `app/schemas/`, `app/src/androidTest/` |
 | **M4** | Afkar Aufaa Farros | *menyusul* | Navigasi & integrasi sistem | `ui/navigation/`, `ui/WaktuKuApp.kt`, `MainActivity.kt`, `WaktuKuApplication.kt`, `AndroidManifest.xml`, `notification/`\*, `data/preferences/`\* |
 
-\* Belum ada. Folder ini dibuat saat tugasnya dikerjakan.
+\* Belum ada. Kedua folder ini milik F4 dan F7 yang ditunda sampai setelah UTS.
 
 Kode M1–M4 sama dengan komentar `PENANGGUNG JAWAB: Mahasiswa N` di kepala
 setiap berkas, jadi tidak ada berkas yang perlu diubah. Urutan M2–M4 mengikuti
 urutan nama. Boleh ditukar, asal sebelum mulai mengerjakan.
 
-Beban kode yang harus dikuasai **saat ini** (setelah kedua PR yang terbuka
-digabung):
+Beban kode yang harus dikuasai per 1 Oktober 2026:
 
 | | Berkas | Baris |
 |---|---|---|
-| M1 | 8 | 1.656 |
-| M2 | 4 (2 di antaranya berkas uji) | 1.010 |
+| M1 | 8 | 2.285 |
+| M2 | 6 (3 di antaranya berkas uji) | 1.549 |
 | M3 | 10 (termasuk `MigrationTest`) | 823 |
-| M4 | 6 + manifest | 475 |
+| M4 | 6 + manifest | 455 |
 
-Karena itu M4 mendapat fitur sistem yang paling sulit (F4 Notifikasi), dan M3
-mendapat keputusan skema database untuk F6.
+F4 dan F6 ditunda sampai setelah UTS, jadi beban ini tidak bertambah lagi
+sebelum pengumpulan. Yang perlu dikejar sekarang adalah pemahaman, bukan baris
+kode baru.
 
 ---
 
@@ -59,7 +60,7 @@ struktur folder secara langsung. Maka:
 2. **Semua orang** harus bisa menjelaskan struktur folder secara keseluruhan
    (tabel di atas) dan satu alur data utuh dari layar sampai database
    ([DOKUMENTASI.md bagian 3](../DOKUMENTASI.md#3-arsitektur)).
-3. **Commit dari akun masing-masing.** Saat ini seluruh 16 commit berasal dari
+3. **Commit dari akun masing-masing.** Per 1 Oktober 2026 seluruh commit masih berasal dari
    akun Hafizh. Riwayat Git adalah bukti siapa mengerjakan apa.
 
 ---
@@ -68,41 +69,43 @@ struktur folder secara langsung. Maka:
 
 | Fitur | Prioritas | Status |
 |---|---|---|
-| F1 Beranda | P0 | Selesai di `main`. Perbaikan tampilan menunggu PR `design/tema-dan-perbaikan-ui` |
-| F2 Navigasi | P0 | Selesai. Dua uji di HP belum dilakukan (tombol kembali, rotasi layar) |
-| F3 Timer Pomodoro | P0 | Kode dan 8 uji unit selesai di PR `feat/f3-timer`. **Belum ada mode demo** |
-| F4 Notifikasi | P0 | **Belum dimulai** |
-| F5 Detail / edit tugas | P1 | Masih placeholder. Query datanya sudah ada |
-| F6 Statistik | P2 | Masih placeholder. Dua dari tiga query sudah ada |
-| F7 Pengaturan | P3 | Masih placeholder. DataStore belum dipasang |
+| F1 Beranda | P0 | **Selesai** di `main` |
+| F2 Navigasi | P0 | **Selesai** di `main`, sudah Type-Safe Navigation. Dua uji di HP belum dilakukan (tombol kembali, rotasi layar) |
+| F3 Timer Pomodoro | P0 | **Selesai** di `main` dengan 8 uji unit. **Belum ada mode demo** (B-1) |
+| F4 Notifikasi | P0 | **Ditunda** sampai setelah UTS |
+| F5 Detail / edit tugas | P1 | **Selesai** di `main` dengan 6 uji unit. Belum diuji di HP |
+| F6 Statistik | P2 | **Ditunda** sampai setelah UTS |
+| F7 Pengaturan | P3 | **Ditunda** sampai setelah UTS |
 
-Kedua PR yang terbuka sudah diuji digabung bersamaan: **tidak ada konflik**,
-`assembleDebug` berhasil, dan 12 uji unit lulus.
+Keadaan `main` per 1 Oktober 2026: `assembleDebug` berhasil dan 20 uji unit
+lulus.
 
 ### Ketentuan teknis dari dosen
 
 Aplikasi wajib menerapkan **minimal 5 dari 7** materi Native Android dengan
-Jetpack Compose. Hasil pengecekan kode per 17 September 2026:
+Jetpack Compose. Hasil pengecekan kode per 1 Oktober 2026:
 
 | # | Materi | Status sekarang | Ditutup oleh |
 |---|---|---|---|
-| 1 | UI & Layout Dasar (Column, Row, Box, Modifier) | **Terpenuhi** (PR #5 dan #6) | — |
-| 2 | Material Design 3 (Color, Typography, Button, OutlinedTextField, Card) | Komponen dan palet warna sudah ada. `Type.kt` lengkap di cabang `feat/h7-tipografi` | H-7 ✅ |
-| 3 | State Management & UDF (`remember`, `rememberSaveable`, state hoisting, UDF) | `rememberSaveable` di cabang `feat/h8-remembersaveable`, juga dipakai di layar Detail | H-8 ✅ |
+| 1 | UI & Layout Dasar (Column, Row, Box, Modifier) | **Terpenuhi** | — |
+| 2 | Material Design 3 (Color, Typography, Button, OutlinedTextField, Card) | **Terpenuhi**: palet warna sendiri, komponen M3, dan `Type.kt` berisi 11 token | H-7 ✅ |
+| 3 | State Management & UDF (`remember`, `rememberSaveable`, state hoisting, UDF) | **Terpenuhi**: `rememberSaveable` di `HomeScreen`, `AddTaskDialog`, dan `TaskDetailScreen` | H-8 ✅ |
 | 4 | Lazy Layouts (`LazyColumn`/`LazyGrid` + `key`) | **Terpenuhi**: `LazyColumn` dengan `key = { task.id }` | — |
 | 5 | Networking & API (Retrofit/Ktor) | **Tidak dikerjakan.** WaktuKu aplikasi luring; sinkronisasi cloud di luar lingkup ([PRD bagian 4.3](../PRD.md)) | — |
-| 6 | Arsitektur MVVM (`ViewModel` + UiState Loading/Success/Error) | `HomeUiState` dan `TaskDetailUiState` berpola Loading/Success/Error, dengan `.catch` | B-8 ✅, H-9 ✅, B-3 ✅, B-4 |
-| 7 | Navigation Compose (min. 3 layar, Type-Safe Navigation, kirim data, BottomNavigation/Scaffold) | Rute `@Serializable` + `toRoute()`; tiga layar nyata: Beranda, Fokus, Detail Tugas | A-6 ✅, H-2 ✅, A-3 ✅ |
+| 6 | Arsitektur MVVM (`ViewModel` + UiState Loading/Success/Error) | **Terpenuhi**: `HomeUiState` dan `TaskDetailUiState` berpola Loading/Success/Error, dengan `.catch` | B-8 ✅, H-9 ✅, B-3 ✅ |
+| 7 | Navigation Compose (min. 3 layar, Type-Safe Navigation, kirim data, BottomNavigation/Scaffold) | **Terpenuhi**: rute `@Serializable` + `toRoute()`; tiga layar: Beranda, Fokus, Detail Tugas | A-6 ✅, H-2 ✅, A-3 ✅ |
 
-**Target: 6 dari 7** (materi 1, 2, 3, 4, 6, 7). Satu materi cadangan di atas
-syarat minimal, tanpa mengubah konsep luring di PRD.
+**Tercapai: 6 dari 7** (materi 1, 2, 3, 4, 6, 7), semuanya sudah di `main`.
+Satu materi cadangan di atas syarat minimal, tanpa mengubah konsep luring di
+PRD.
 
 ---
 
 ### Status 29 September 2026
 
-Tugas bertanda ✅ di tabel atas sudah dikerjakan dan menunggu di-merge. Urutan
-merge wajib diikuti karena cabangnya bertumpuk:
+Tugas bertanda ✅ di tabel atas dikerjakan dalam lima cabang berikut. Semuanya
+**sudah di-merge ke `main`** pada 1 Oktober 2026 (PR #8 sampai #12), dengan
+urutan ini karena cabangnya bertumpuk:
 
 | Urutan | Cabang | Isi |
 |---|---|---|
@@ -123,25 +126,57 @@ berhasil, dan 20 uji unit lulus.
 > komentar penjelas. Bagian ini juga wajib ditulis jujur di Formulir
 > Deklarasi Penggunaan AI (B-7).
 
+### Status 1 Oktober 2026
+
+**Tenggat: Senin, 5 Oktober 2026 pukul 16.00**, untuk tautan source code dan
+Formulir Deklarasi Penggunaan AI di eLDirU.
+
+**Lingkup dipotong.** F4 Notifikasi, F6 Statistik, dan F7 Pengaturan ditunda
+sampai setelah UTS. Tab Statistik, ikon Pengaturan, dan `PlaceholderScreen`
+sudah dihapus dari aplikasi, jadi yang didemokan hanya layar yang benar-benar
+jadi: Beranda, Fokus, dan Detail Tugas. Alasan lengkapnya ada di
+[PRD bagian 9](../PRD.md#9-prioritas-dan-urutan-potong). Ringkasnya: ketiganya
+belum dimulai, memakai hal di luar materi kuliah sampai Pertemuan 6
+(`AlarmManager`, `BroadcastReceiver`, DataStore, `Canvas`), dan UTS berbentuk
+tanya jawab lisan tentang kode sendiri.
+
+Tugas yang ikut ditunda: H-3, H-5, B-2, B-4, B-5, U-3, U-4, U-5, A-2, A-4.
+
+**Sisa pekerjaan sampai tenggat:**
+
+| Siapa | Tugas | Catatan |
+|---|---|---|
+| Hafizh | H-1, H-4, H-6 | H-6 dikerjakan terakhir, setelah video jadi |
+| Biladi | **B-1**, B-6, B-7 | B-1 (mode demo) **menahan video**: tanpa itu sesi 25 menit tidak bisa ditunjukkan selesai |
+| Abu Umar | U-1, U-6, U-7 | U-6: `DOKUMENTASI.md` bagian 2 dan 8 sudah usang |
+| Afkar | A-1, A-5 | Kirim NIM untuk README, dokumen ini, dan formulir deklarasi |
+| Semua | Terima undangan *collaborator*, `git clone`, build di laptop sendiri | Lalu latihan tanya jawab memakai bagian 7 |
+
+**Yang belum pernah diuji di HP:** layar Detail Tugas, navigasi setelah migrasi
+Type-Safe (A-1), dan `MigrationTest` (U-1).
+
 ## 4. Tugas per orang
 
 Setiap tugas punya kode (H, B, U, A) supaya mudah disebut di grup dan dipakai
-sebagai nama cabang, misalnya `feat/a2-notifikasi`.
+sebagai nama cabang, misalnya `feat/b1-mode-demo`.
+
+Tanda di kolom kode: **✅** selesai dan sudah di `main` · **⏸** ditunda sampai
+setelah UTS · tanpa tanda berarti masih harus dikerjakan sebelum tenggat.
 
 ### M1 · Hafizh — UI
 
 | Kode | Fitur | Tugas | Menunggu |
 |---|---|---|---|
-| H-0 | — | Gabungkan PR `design/tema-dan-perbaikan-ui` dan PR `feat/f3-timer`. Undang Biladi, Abu Umar, dan Afkar sebagai *collaborator* | — |
+| H-0 ✅ | — | Gabungkan PR `design/tema-dan-perbaikan-ui` dan PR `feat/f3-timer`. Undang Biladi, Abu Umar, dan Afkar sebagai *collaborator* | — |
 | H-1 | F3 | Rapikan `TimerScreen`: ikon Jeda dan Hentikan (Vector Asset, seperti ikon tab), angka timer lebih besar, warna berbeda untuk fokus dan istirahat, keterangan "istirahat panjang setelah 4 sesi" | H-0 |
-| H-2 | F5 | `TaskDetailScreen`: judul, catatan, chip prioritas, `DatePicker` tenggat, tombol −/+ target sesi, riwayat sesi, Simpan, Hapus dengan dialog konfirmasi | B-3 |
-| H-3 | F6 | `StatsScreen`: kartu total sesi dan menit hari ini, diagram batang 7 hari digambar dengan `Canvas`, tampilan kosong | B-4 |
+| H-2 ✅ | F5 | `TaskDetailScreen`: judul, catatan, chip prioritas, `DatePicker` tenggat, tombol −/+ target sesi, riwayat sesi, Simpan, Hapus dengan dialog konfirmasi | B-3 |
+| H-3 ⏸ | F6 | `StatsScreen`: kartu total sesi dan menit hari ini, diagram batang 7 hari digambar dengan `Canvas`, tampilan kosong | B-4 |
 | H-4 | — | Layar pembuka ikut mode gelap (`themes.xml`), centang pada chip prioritas di `AddTaskDialog` | — |
-| H-5 | F7 | *Opsional:* `SettingsScreen` | A-4 |
+| H-5 ⏸ | F7 | *Opsional:* `SettingsScreen` | A-4 |
 | H-6 | UTS | Tangkapan layar setiap layar (terang dan gelap). Sebagai perwakilan, unggah tautan repo dan tangkapan layar ke eLDirU | semua |
-| H-7 | Materi 2 | Tulis `Type.kt` sungguhan: minimal `headlineMedium`, `titleLarge`, `titleMedium`, `bodyLarge`, `bodyMedium`, `labelLarge`, `labelSmall` (fontFamily, fontWeight, fontSize, lineHeight, letterSpacing). Tidak ada `fontSize` hardcoded di layar | H-0 |
-| H-8 | Materi 3 | Pakai `rememberSaveable` untuk state UI yang harus bertahan saat layar diputar: `showAddDialog` di `HomeScreen`, serta `title`, `priority`, `sudahDisentuh` di `AddTaskDialog`. Perbarui komentar di `AddTaskDialog` yang menyebut `rememberSaveable` tidak dipakai. Uji: putar HP saat dialog terbuka, isian harus tetap ada | H-0 |
-| H-9 | Materi 6 | `HomeScreen` membaca UiState baru dari B-8: `when (uiState)` untuk Loading, Success, dan Error. Tambah tampilan `ErrorState` dan perbarui Preview | B-8 |
+| H-7 ✅ | Materi 2 | Tulis `Type.kt` sungguhan: minimal `headlineMedium`, `titleLarge`, `titleMedium`, `bodyLarge`, `bodyMedium`, `labelLarge`, `labelSmall` (fontFamily, fontWeight, fontSize, lineHeight, letterSpacing). Tidak ada `fontSize` hardcoded di layar | H-0 |
+| H-8 ✅ | Materi 3 | Pakai `rememberSaveable` untuk state UI yang harus bertahan saat layar diputar: `showAddDialog` di `HomeScreen`, serta `title`, `priority`, `sudahDisentuh` di `AddTaskDialog`. Perbarui komentar di `AddTaskDialog` yang menyebut `rememberSaveable` tidak dipakai. Uji: putar HP saat dialog terbuka, isian harus tetap ada | H-0 |
+| H-9 ✅ | Materi 6 | `HomeScreen` membaca UiState baru dari B-8: `when (uiState)` untuk Loading, Success, dan Error. Tambah tampilan `ErrorState` dan perbarui Preview | B-8 |
 
 H-2 juga memenuhi syarat **minimal 3 layar** pada materi 7, jadi layar Detail
 tidak boleh dipotong lagi seperti rencana potong di PRD bagian 9.
@@ -154,13 +189,13 @@ menetapkan bentuk data class-nya. Tidak perlu menunggu ViewModel selesai.
 | Kode | Fitur | Tugas | Menunggu |
 |---|---|---|---|
 | B-1 | F3 | **Mode demo:** durasi fase bisa dipersingkat (misal 10 detik). Wajib untuk video. Sekarang 25/5/15 menit tertulis tetap di enum `PomodoroPhase` | H-0 |
-| B-2 | F3 | Simpan `targetEndMillis` ke `SavedStateHandle` supaya timer tidak hilang saat Android mematikan proses aplikasi (batasan ini tercatat di PRD bagian F3) | H-0 |
-| B-3 | F5 | `TaskDetailViewModel`: muat tugas lewat `observeTask(id)`, state form, validasi judul kosong, simpan, hapus. **Tetapkan `TaskDetailUiState` di hari pertama** supaya H-2 bisa jalan. Pakai pola Loading/Success/Error seperti B-8 | — |
-| B-4 | F6 | `StatsViewModel`: gabungkan query menjadi `StatsUiState`. **Tetapkan bentuknya di hari pertama**. Pakai pola Loading/Success/Error seperti B-8 | U-3 |
-| B-5 | F4 | Panggil penjadwal notifikasi dari `PomodoroViewModel`: jadwalkan saat Mulai/Lanjut, batalkan saat Jeda/Hentikan | A-2, U-5 |
+| B-2 ⏸ | F3 | Simpan `targetEndMillis` ke `SavedStateHandle` supaya timer tidak hilang saat Android mematikan proses aplikasi (batasan ini tercatat di PRD bagian F3) | H-0 |
+| B-3 ✅ | F5 | `TaskDetailViewModel`: muat tugas lewat `observeTask(id)`, state form, validasi judul kosong, simpan, hapus. **Tetapkan `TaskDetailUiState` di hari pertama** supaya H-2 bisa jalan. Pakai pola Loading/Success/Error seperti B-8 | — |
+| B-4 ⏸ | F6 | `StatsViewModel`: gabungkan query menjadi `StatsUiState`. **Tetapkan bentuknya di hari pertama**. Pakai pola Loading/Success/Error seperti B-8 | U-3 |
+| B-5 ⏸ | F4 | Panggil penjadwal notifikasi dari `PomodoroViewModel`: jadwalkan saat Mulai/Lanjut, batalkan saat Jeda/Hentikan | A-2, U-5 |
 | B-6 | — | Uji unit untuk B-1 sampai B-4. `./gradlew :app:testDebugUnitTest` harus hijau sebelum push | — |
 | B-7 | UTS | Koordinator **Formulir Deklarasi Penggunaan AI**: kumpulkan isian dari semua anggota, lalu unggah | semua |
-| B-8 | Materi 6 | Ubah `HomeUiState` menjadi pola **Loading / Success / Error** (rincian di bawah). Perbarui `TaskViewModelTest` dan tambah satu uji untuk keadaan Error. **Tetapkan bentuknya di hari pertama** supaya H-9 bisa jalan | H-0 |
+| B-8 ✅ | Materi 6 | Ubah `HomeUiState` menjadi pola **Loading / Success / Error** (rincian di bawah). Perbarui `TaskViewModelTest` dan tambah satu uji untuk keadaan Error. **Tetapkan bentuknya di hari pertama** supaya H-9 bisa jalan | H-0 |
 
 Rincian B-8:
 
@@ -189,9 +224,9 @@ sealed interface HomeUiState {
 |---|---|---|---|
 | U-1 | — | Jalankan `MigrationTest` dengan HP tersambung: `./gradlew :app:connectedDebugAndroidTest`. Uji ini sudah ditulis tapi **belum pernah dijalankan** | — |
 | U-2 | F5 | Periksa `observeTask` dan `observeSessionsForTask` dengan data contoh, termasuk urutan riwayat sesinya | — |
-| U-3 | F6 | Query rekap sesi **per hari** untuk 7 hari terakhir. Yang ada sekarang baru total per rentang waktu (`observeCompletedCount`, `observeTotalMinutes`) | — |
-| U-4 | F6 | **Putuskan:** "tugas selesai minggu ini" butuh kolom `completed_at` yang belum ada di `Task`. Pilih: tambah kolom lewat Migration 2→3 beserta ujinya, atau ubah kriterianya menjadi "total tugas selesai" dan catat di PRD | — |
-| U-5 | F4 | Pasang penjadwal notifikasi buatan A-2 di `AppContainer` | A-2 |
+| U-3 ⏸ | F6 | Query rekap sesi **per hari** untuk 7 hari terakhir. Yang ada sekarang baru total per rentang waktu (`observeCompletedCount`, `observeTotalMinutes`) | — |
+| U-4 ⏸ | F6 | **Putuskan:** "tugas selesai minggu ini" butuh kolom `completed_at` yang belum ada di `Task`. Pilih: tambah kolom lewat Migration 2→3 beserta ujinya, atau ubah kriterianya menjadi "total tugas selesai" dan catat di PRD | — |
+| U-5 ⏸ | F4 | Pasang penjadwal notifikasi buatan A-2 di `AppContainer` | A-2 |
 | U-6 | — | Perbarui [DOKUMENTASI.md](../DOKUMENTASI.md) bagian 2 dan 8. Daftar berkas dan daftar "yang belum dikerjakan" di sana sudah usang | — |
 | U-7 | UTS | Teks forum eLDirU: perkenalan kelompok dan peran (tabel bagian 1), latar belakang ([PRD bagian 2](../PRD.md)), deskripsi aplikasi ([PRD bagian 1](../PRD.md)) | — |
 
@@ -200,11 +235,11 @@ sealed interface HomeUiState {
 | Kode | Fitur | Tugas | Menunggu |
 |---|---|---|---|
 | A-1 | F2 | Uji di HP: (1) pindah Beranda → Fokus → Statistik, tekan kembali sekali, aplikasi harus langsung tertutup; (2) putar HP di tab Statistik, harus tetap di Statistik. Centang di PRD | — |
-| A-2 | F4 | **Notifikasi** — rincian di bawah | — |
-| A-3 | F5, F6 | Ganti placeholder Detail dan Statistik (dan Pengaturan bila F7 dikerjakan) di `WaktuKuNavHost` dengan layar sungguhan. Hapus `PlaceholderScreen` setelah semuanya terganti, bersama M1 | H-2, H-3, A-6 |
-| A-4 | F7 | *Opsional:* DataStore untuk Pengaturan di `data/preferences/` (perlu dependensi baru) | — |
+| A-2 ⏸ | F4 | **Notifikasi** — rincian di bawah | — |
+| A-3 ✅ | F5, F6 | Ganti placeholder Detail dan Statistik (dan Pengaturan bila F7 dikerjakan) di `WaktuKuNavHost` dengan layar sungguhan. Hapus `PlaceholderScreen` setelah semuanya terganti, bersama M1 | H-2, H-3, A-6 |
+| A-4 ⏸ | F7 | *Opsional:* DataStore untuk Pengaturan di `data/preferences/` (perlu dependensi baru) | — |
 | A-5 | UTS | Rekam dan sunting **video demo** sesuai [skenario PRD bagian 11](../PRD.md). Setiap anggota menarasikan bagiannya sendiri | B-1, semua |
-| A-6 | Materi 7 | **Migrasi ke Type-Safe Navigation** — rincian di bawah. Kerjakan **sebelum A-3**, supaya rute layar baru langsung memakai cara baru | H-0 |
+| A-6 ✅ | Materi 7 | **Migrasi ke Type-Safe Navigation** — rincian di bawah. Kerjakan **sebelum A-3**, supaya rute layar baru langsung memakai cara baru | H-0 |
 
 Rincian A-2:
 
@@ -251,9 +286,9 @@ saling menunggu tanpa tahu.
 
 | Fitur | Urutan |
 |---|---|
-| F4 Notifikasi | A-2 membuat penjadwal → U-5 memasangnya di `AppContainer` → B-5 memanggilnya dari `PomodoroViewModel` |
+| F4 Notifikasi | **Ditunda.** A-2 membuat penjadwal → U-5 memasangnya di `AppContainer` → B-5 memanggilnya dari `PomodoroViewModel` |
 | F5 Detail | B-3 menetapkan `TaskDetailUiState` → H-2 membangun layar (mulai dari Preview) → A-3 menyambungkan rute. U-2 dikerjakan di awal |
-| F6 Statistik | U-3 dan U-4 menyiapkan query → B-4 menetapkan `StatsUiState` → H-3 membangun layar → A-3 menyambungkan rute |
+| F6 Statistik | **Ditunda.** U-3 dan U-4 menyiapkan query → B-4 menetapkan `StatsUiState` → H-3 membangun layar → A-3 menyambungkan rute |
 | Materi 6 UiState | B-8 menetapkan `HomeUiState` baru → H-9 menyesuaikan `HomeScreen`. Keduanya digabung dalam waktu berdekatan supaya build tidak rusak lama |
 | Materi 7 Type-safe | A-6 memigrasi rute → A-3 menyambungkan layar baru dengan objek rute. Layar (H-2, H-3) tidak terpengaruh karena hanya menerima lambda |
 
@@ -264,8 +299,9 @@ paling sering disentuh orang lain. **Bilang dulu di grup** sebelum mengubahnya.
 
 ## 6. Urutan kerja
 
-> **Tenggat pengumpulan:** `______________` — belum tercantum di halaman
-> eLDirU Pertemuan 8. Tanyakan, lalu isi di sini.
+> **Tenggat pengumpulan:** Senin, 5 Oktober 2026 pukul 16.00 (eLDirU,
+> Pertemuan 8). Urutan di bawah adalah rencana awal. Sisa pekerjaan yang
+> berlaku sekarang ada di bagian 3, "Status 1 Oktober 2026".
 
 1. **Hari ini** — H-0: gabungkan dua PR dan undang collaborator. Semua orang
    `git clone`, lalu `./gradlew :app:assembleDebug` harus hijau di laptop
@@ -349,7 +385,7 @@ Berkas: `Task.kt`, `PomodoroSession.kt`, `TaskDao.kt`, `PomodoroDao.kt`,
 
 Berkas: `WaktuKuDestinations.kt`, `WaktuKuBottomBar.kt`, `WaktuKuNavHost.kt`,
 `WaktuKuApp.kt`, `MainActivity.kt`, `WaktuKuApplication.kt`,
-`AndroidManifest.xml`, dan berkas `notification/` yang akan dibuat
+`AndroidManifest.xml`
 
 - Apa itu Type-Safe Navigation? Apa kelebihannya dibanding rute berupa teks
   seperti `"task/{taskId}"`?
@@ -357,12 +393,12 @@ Berkas: `WaktuKuDestinations.kt`, `WaktuKuBottomBar.kt`, `WaktuKuNavHost.kt`,
   `toRoute()`), dan bagaimana `Timer` dibuka tanpa memilih tugas?
 - Apa fungsi `popUpTo`, `saveState`, `restoreState`, dan `launchSingleTop`?
 - Kenapa tab aktif diperiksa lewat `hierarchy`?
-- Kenapa bottom bar ada di `WaktuKuApp` dan disembunyikan di Detail? Kenapa
-  Pengaturan bukan tab?
+- Kenapa bottom bar ada di `WaktuKuApp` dan disembunyikan di Detail?
 - Apa itu pola *single-activity*? Apa peran kelas `Application`?
 - Kenapa perlu `consumeWindowInsets`?
-- Kenapa izin notifikasi diminta saat runtime, dan kenapa notifikasi
-  dijadwalkan lewat `AlarmManager`?
+- Kenapa Notifikasi, Statistik, dan Pengaturan ditunda? Kalau layar Statistik
+  dibuat nanti, apa saja yang perlu ditambahkan di `WaktuKuDestinations.kt` dan
+  `WaktuKuNavHost.kt`?
 
 ---
 

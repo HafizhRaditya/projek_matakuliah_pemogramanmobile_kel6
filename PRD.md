@@ -56,15 +56,18 @@ Empat aturan yang dipakai untuk memutuskan saat ada perdebatan fitur:
 
 ### 4.2 Masuk MVP
 
-| Kode | Fitur | Prioritas | PIC utama |
-|---|---|---|---|
-| F1 | Home diperbarui: ketuk kartu, tombol mulai fokus, progres sesi | **P0** | M1 + M2 |
-| F2 | Navigasi antar layar (`NavHost`) | **P0** | M4 |
-| F3 | Timer Pomodoro terikat tugas | **P0** | M2 + M3 |
-| F4 | Notifikasi saat sesi berakhir | **P0** | M4 |
-| F5 | Detail / edit tugas | P1 | M1 + M3 |
-| F6 | Statistik sederhana | P2 | M3 + M1 |
-| F7 | Pengaturan durasi & tema | P3 | M4 + M1 |
+| Kode | Fitur | Prioritas | PIC utama | Status untuk UTS |
+|---|---|---|---|---|
+| F1 | Home diperbarui: ketuk kartu, tombol mulai fokus, progres sesi | **P0** | M1 + M2 | Masuk |
+| F2 | Navigasi antar layar (`NavHost`) | **P0** | M4 | Masuk |
+| F3 | Timer Pomodoro terikat tugas | **P0** | M2 + M3 | Masuk |
+| F4 | Notifikasi saat sesi berakhir | **P0** | M4 | **Ditunda** |
+| F5 | Detail / edit tugas | P1 | M1 + M3 | Masuk |
+| F6 | Statistik sederhana | P2 | M3 + M1 | **Ditunda** |
+| F7 | Pengaturan durasi & tema | P3 | M4 + M1 | **Ditunda** |
+
+Kolom terakhir mengikuti keputusan lingkup 1 Oktober 2026 di
+[bagian 9](#9-prioritas-dan-urutan-potong).
 
 ### 4.3 Di luar lingkup — tidak dikerjakan semester ini
 
@@ -88,14 +91,19 @@ flowchart LR
     H["Home<br/>daftar tugas"] -->|ketuk kartu| D["Detail Tugas<br/>F5"]
     H -->|tombol fokus| T["Timer Pomodoro<br/>F3"]
     D -->|tombol fokus| T
-    H -->|tab bawah| S["Statistik<br/>F6"]
-    H -->|ikon gerigi| P["Pengaturan<br/>F7"]
+    H -.->|tab bawah, ditunda| S["Statistik<br/>F6"]
+    H -.->|ikon gerigi, ditunda| P["Pengaturan<br/>F7"]
     T -->|sesi selesai| H
 ```
 
-Navigasi utama memakai **bottom navigation** tiga tab: Beranda, Fokus, Statistik.
-Pengaturan dicapai lewat ikon gerigi di TopAppBar, bukan tab tersendiri —
-frekuensi pemakaiannya rendah.
+Rancangan lengkapnya memakai **bottom navigation** tiga tab: Beranda, Fokus,
+Statistik. Pengaturan dicapai lewat ikon gerigi di TopAppBar, bukan tab
+tersendiri — frekuensi pemakaiannya rendah.
+
+**Untuk UTS** (garis putus-putus pada diagram): Statistik dan Pengaturan
+ditunda, jadi bottom navigation berisi dua tab (Beranda dan Fokus) dan ikon
+gerigi belum ditampilkan. Aplikasi tetap punya tiga layar: Beranda, Fokus, dan
+Detail Tugas.
 
 ---
 
@@ -162,6 +170,8 @@ di sini supaya tidak terlupakan, bukan diabaikan.
 
 ### F4 — Notifikasi · P0
 
+**Ditunda sampai setelah UTS** (keputusan 1 Oktober 2026, bagian 9).
+
 > Sebagai pengguna, saya ingin diberi tahu saat sesi berakhir walau sedang
 > membuka aplikasi lain.
 
@@ -182,6 +192,8 @@ di sini supaya tidak terlupakan, bukan diabaikan.
 
 ### F6 — Statistik sederhana · P2
 
+**Ditunda sampai setelah UTS** (keputusan 1 Oktober 2026, bagian 9).
+
 > Sebagai mahasiswa, saya ingin melihat rekap fokus saya minggu ini, agar tahu
 > apakah kebiasaan belajar saya membaik.
 
@@ -191,6 +203,8 @@ di sini supaya tidak terlupakan, bukan diabaikan.
 - [ ] Tampilan kosong yang jelas bila belum ada data sama sekali
 
 ### F7 — Pengaturan · P3
+
+**Ditunda sampai setelah UTS** (keputusan 1 Oktober 2026, bagian 9).
 
 > Sebagai pengguna, saya ingin menyesuaikan durasi karena 25 menit tidak cocok
 > untuk semua orang.
@@ -264,6 +278,38 @@ JANGAN dipotong →  F1-F4               (tanpa ini aplikasi bukan "WaktuKu")
 Aplikasi dengan empat fitur yang mulus jauh lebih baik dinilai daripada tujuh
 fitur yang setengahnya error saat demo.
 
+### Keputusan lingkup untuk UTS — 1 Oktober 2026
+
+Tenggat pengumpulan UTS adalah **Senin, 5 Oktober 2026 pukul 16.00**. Dengan
+sisa waktu empat hari, lingkup untuk UTS ditetapkan sebagai berikut:
+
+| Fitur | Keputusan |
+|---|---|
+| F1 Beranda, F2 Navigasi, F3 Timer, F5 Detail | **Masuk UTS** |
+| F7 Pengaturan | Ditunda, sesuai urutan potong di atas |
+| F6 Statistik | Ditunda, sesuai urutan potong di atas |
+| F4 Notifikasi | Ditunda. Ini **menyimpang** dari aturan "F1–F4 jangan dipotong" |
+
+Alasan F4 ikut ditunda:
+
+1. **Belum dimulai sama sekali**, sedangkan pengerjaannya menyentuh tiga folder
+   (penjadwal, `AppContainer`, `PomodoroViewModel`) dan butuh uji di HP.
+2. **Di luar materi kuliah sampai Pertemuan 6.** Notifikasi memakai
+   `AlarmManager`, `BroadcastReceiver`, dan izin runtime; Pengaturan memakai
+   DataStore; Statistik memakai `Canvas`. UTS berbentuk tanya jawab lisan
+   tentang kode sendiri, jadi menambah kode yang belum dikuasai lebih
+   merugikan daripada menguntungkan.
+3. **Syarat dosen sudah terpenuhi tanpa ketiganya**: 6 dari 7 materi, dan tiga
+   layar nyata.
+
+Akibatnya di aplikasi: saat sesi berakhir, pengguna diberi tahu lewat layar
+Fokus saja (tidak ada notifikasi sistem); durasi tetap 25/5/15 menit; tema
+mengikuti sistem. Ketiga fitur dilanjutkan setelah UTS.
+
+> Keputusan ini diusulkan Hafizh sebagai pemilik repo karena tenggat sudah
+> dekat. Bagian 12 mensyaratkan perubahan lingkup disepakati bersama, jadi
+> anggota yang keberatan menyampaikannya di grup sebelum pengumpulan.
+
 ---
 
 ## 10. Rencana kerja 4 minggu
@@ -282,13 +328,15 @@ Titik sinkronisasi: **akhir minggu 1**, pastikan `NavHost` (M4) dan
 
 ## 11. Kriteria selesai untuk demo
 
-Skenario tiga menit yang harus berjalan mulus tanpa error:
+Skenario tiga menit yang harus berjalan mulus tanpa error (langkah 4 dan 5
+sudah disesuaikan dengan keputusan lingkup 1 Oktober 2026: tanpa notifikasi dan
+tanpa layar Statistik):
 
 1. Buka aplikasi, tambah tugas baru "Belajar UTS Basis Data", prioritas Tinggi, target 4 sesi
 2. Ketuk tombol fokus pada tugas itu — timer terbuka dan mulai berjalan
 3. Kunci layar 10 detik, buka lagi — hitungan tetap akurat, tidak melompat
-4. Percepat sesi (mode demo) hingga selesai — notifikasi muncul, progres tugas jadi "1/4 sesi"
-5. Buka Statistik — sesi tadi tercatat
+4. Percepat sesi (mode demo) hingga selesai — progres tugas jadi "1/4 sesi"
+5. Ketuk kartu tugas itu — layar Detail terbuka dan sesi tadi tercatat di riwayat sesi
 6. Tutup paksa aplikasi, buka lagi — semua data masih ada
 7. Centang tugas sebagai selesai — pindah ke penyaring "Selesai"
 
