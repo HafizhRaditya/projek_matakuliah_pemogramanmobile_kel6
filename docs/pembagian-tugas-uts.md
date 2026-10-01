@@ -86,18 +86,42 @@ Jetpack Compose. Hasil pengecekan kode per 17 September 2026:
 
 | # | Materi | Status sekarang | Ditutup oleh |
 |---|---|---|---|
-| 1 | UI & Layout Dasar (Column, Row, Box, Modifier) | Column, Row, dan Modifier sudah ada. `Box` baru ada di dua PR yang belum digabung | H-0 |
-| 2 | Material Design 3 (Color, Typography, Button, OutlinedTextField, Card) | Komponen sudah ada. Palet warna menunggu PR `design/tema-dan-perbaikan-ui`. `Type.kt` masih templat | H-0, H-7 |
-| 3 | State Management & UDF (`remember`, `rememberSaveable`, state hoisting, UDF) | `remember`, state hoisting, dan UDF sudah ada. **`rememberSaveable` belum dipakai** | H-8 |
+| 1 | UI & Layout Dasar (Column, Row, Box, Modifier) | **Terpenuhi** (PR #5 dan #6) | — |
+| 2 | Material Design 3 (Color, Typography, Button, OutlinedTextField, Card) | Komponen dan palet warna sudah ada. `Type.kt` lengkap di cabang `feat/h7-tipografi` | H-7 ✅ |
+| 3 | State Management & UDF (`remember`, `rememberSaveable`, state hoisting, UDF) | `rememberSaveable` di cabang `feat/h8-remembersaveable`, juga dipakai di layar Detail | H-8 ✅ |
 | 4 | Lazy Layouts (`LazyColumn`/`LazyGrid` + `key`) | **Terpenuhi**: `LazyColumn` dengan `key = { task.id }` | — |
 | 5 | Networking & API (Retrofit/Ktor) | **Tidak dikerjakan.** WaktuKu aplikasi luring; sinkronisasi cloud di luar lingkup ([PRD bagian 4.3](../PRD.md)) | — |
-| 6 | Arsitektur MVVM (`ViewModel` + UiState Loading/Success/Error) | `ViewModel` dan `StateFlow` sudah ada. `HomeUiState` baru punya `isLoading`, **belum ada Error** | B-8, H-9, B-3, B-4 |
-| 7 | Navigation Compose (min. 3 layar, Type-Safe Navigation, kirim data, BottomNavigation/Scaffold) | NavHost, bottom navigation, Scaffold, dan pengiriman `taskId` sudah ada. **Rute masih berupa teks, belum type-safe.** Layar nyata baru Beranda (+ Timer setelah H-0) | A-6, H-2, A-3 |
+| 6 | Arsitektur MVVM (`ViewModel` + UiState Loading/Success/Error) | `HomeUiState` dan `TaskDetailUiState` berpola Loading/Success/Error, dengan `.catch` | B-8 ✅, H-9 ✅, B-3 ✅, B-4 |
+| 7 | Navigation Compose (min. 3 layar, Type-Safe Navigation, kirim data, BottomNavigation/Scaffold) | Rute `@Serializable` + `toRoute()`; tiga layar nyata: Beranda, Fokus, Detail Tugas | A-6 ✅, H-2 ✅, A-3 ✅ |
 
 **Target: 6 dari 7** (materi 1, 2, 3, 4, 6, 7). Satu materi cadangan di atas
 syarat minimal, tanpa mengubah konsep luring di PRD.
 
 ---
+
+### Status 29 September 2026
+
+Tugas bertanda ✅ di tabel atas sudah dikerjakan dan menunggu di-merge. Urutan
+merge wajib diikuti karena cabangnya bertumpuk:
+
+| Urutan | Cabang | Isi |
+|---|---|---|
+| 1 | `feat/h7-tipografi` | H-7 |
+| 2 | `feat/h8-remembersaveable` | H-8 |
+| 3 | `feat/b8-h9-uistate` | B-8, H-9 |
+| 4 | `feat/a6-typesafe-nav` | A-6 |
+| 5 | `feat/b3-h2-detail-tugas` | B-3, H-2, A-3 |
+
+Kelima cabang sudah diuji digabung bersamaan: tanpa konflik, `assembleDebug`
+berhasil, dan 20 uji unit lulus.
+
+> **Penting untuk UTS.** B-8, B-3, A-6, dan A-3 dikerjakan Hafizh dengan
+> bantuan AI (Claude) supaya aplikasi memenuhi syarat dosen tepat waktu.
+> Kodenya tetap menjadi **tanggung jawab pemilik folder**: Biladi wajib
+> menguasai `TaskViewModel.kt` dan `TaskDetailViewModel.kt` beserta ujinya,
+> Afkar wajib menguasai seluruh `ui/navigation/`. Setiap berkas sudah diberi
+> komentar penjelas. Bagian ini juga wajib ditulis jujur di Formulir
+> Deklarasi Penggunaan AI (B-7).
 
 ## 4. Tugas per orang
 
