@@ -15,7 +15,7 @@ harus dikerjakan, dan apa yang harus dikuasai tiap orang saat ditanya dosen.
 | **M1** | Hafizh Naufal Raditya | H1D024061 | UI/UX (Jetpack Compose), pemilik repo | `ui/screens/`, `ui/components/`, `ui/theme/`, `res/drawable/`, `res/values/` |
 | **M2** | Biladi Amna | H1D024074 | State & logika (ViewModel) | `ui/viewmodel/`, `app/src/test/` |
 | **M3** | Muhammad Abu Umar | H1D024084 | Penyimpanan lokal (Room) | `model/`, `data/`, `app/schemas/`, `app/src/androidTest/` |
-| **M4** | Afkar Aufaa Farros | *menyusul* | Navigasi & integrasi sistem | `ui/navigation/`, `ui/WaktuKuApp.kt`, `MainActivity.kt`, `WaktuKuApplication.kt`, `AndroidManifest.xml`, `notification/`\*, `data/preferences/`\* |
+| **M4** | Afkar Aufaa Farros | H1D02085 | Navigasi & integrasi sistem | `ui/navigation/`, `ui/WaktuKuApp.kt`, `MainActivity.kt`, `WaktuKuApplication.kt`, `AndroidManifest.xml`, `notification/`\*, `data/preferences/`\* |
 
 \* Belum ada. Folder ini dibuat saat tugasnya dikerjakan.
 
