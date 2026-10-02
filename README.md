@@ -168,10 +168,16 @@ Atau buka folder ini di Android Studio, lalu tekan **Run**.
 
 - [x] Navigasi antar layar dengan `NavHost`
 - [x] Lapisan data Pomodoro: entity `PomodoroSession` dan Migration 1→2
-- [ ] Timer Pomodoro: `PomodoroViewModel` dan `TimerScreen` (menunggu PR `feat/f3-timer`)
-- [ ] Unit test `TaskViewModel` (menunggu PR `design/tema-dan-perbaikan-ui`)
+- [x] Timer Pomodoro: `PomodoroViewModel` dan `TimerScreen`
+- [x] Unit test `TaskViewModel`, `PomodoroViewModel`, dan `TaskDetailViewModel`
+- [x] Layar Detail Tugas
+- [x] UiState berpola Loading / Success / Error dan Type-Safe Navigation
+- [ ] Mode demo timer (durasi dipersingkat untuk video dan presentasi)
+
+Ditunda sampai setelah UTS (alasannya di [PRD bagian 9](PRD.md#9-prioritas-dan-urutan-potong)):
+
 - [ ] Notifikasi saat sesi Pomodoro selesai
-- [ ] Layar Detail Tugas, Statistik, dan Pengaturan
+- [ ] Layar Statistik dan Pengaturan
 
 Pembagian dan urutan pengerjaannya ada di
 [docs/pembagian-tugas-uts.md](docs/pembagian-tugas-uts.md).

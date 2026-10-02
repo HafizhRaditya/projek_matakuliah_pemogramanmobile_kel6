@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +21,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -84,7 +82,6 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     onTaskClick: (Long) -> Unit,
     onStartFocus: (Long) -> Unit,
-    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TaskViewModel = viewModel(factory = TaskViewModel.Factory),
 ) {
@@ -103,13 +100,12 @@ fun HomeScreen(
         onUndoDelete = viewModel::undoDeletion,
         onDeleteConfirmed = viewModel::deleteTask,
         onAddTask = { title, priority -> viewModel.addTask(title = title, priority = priority) },
-        // Tiga callback ini tidak menyentuh ViewModel sama sekali - mereka
+        // Dua callback ini tidak menyentuh ViewModel sama sekali - mereka
         // hanya diteruskan ke atas, ke NavHost. Alasannya: berpindah layar
         // adalah urusan navigasi, bukan urusan state tugas. ViewModel tidak
         // perlu tahu bahwa aplikasi ini punya layar lain.
         onTaskClick = onTaskClick,
         onStartFocus = onStartFocus,
-        onOpenSettings = onOpenSettings,
         modifier = modifier,
     )
 }
@@ -126,7 +122,6 @@ fun HomeScreen(
  * @param onAddTask dilaporkan saat tugas baru dikirim dari dialog.
  * @param onTaskClick dilaporkan saat badan kartu ditekan, membawa id tugas.
  * @param onStartFocus dilaporkan saat tombol mulai fokus ditekan.
- * @param onOpenSettings dilaporkan saat ikon gerigi ditekan.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,7 +135,6 @@ fun HomeScreen(
     onAddTask: (String, TaskPriority) -> Unit,
     onTaskClick: (Long) -> Unit,
     onStartFocus: (Long) -> Unit,
-    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // State milik UI semata (dialog sedang terbuka atau tidak) BOLEH disimpan
@@ -181,16 +175,10 @@ fun HomeScreen(
                             text = "${uiState.doneCount}/${uiState.totalCount} selesai",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    // Pengaturan sengaja TIDAK dijadikan tab di bawah. Panduan
-                    // Material Design menganjurkan bottom navigation hanya
-                    // diisi tujuan yang sering dipakai, sedangkan Pengaturan
-                    // jarang dibuka. Ikon gerigi di sini jalan masuknya.
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Buka pengaturan",
+                            // Jarak ke tepi kanan layar. Teks ini elemen
+                            // terakhir di TopAppBar, jadi tanpa padding ia
+                            // menempel ke pinggir.
+                            modifier = Modifier.padding(end = 16.dp),
                         )
                     }
                 },
@@ -505,7 +493,6 @@ private fun HomeScreenPreview() {
             onAddTask = { _, _ -> },
             onTaskClick = {},
             onStartFocus = {},
-            onOpenSettings = {},
         )
     }
 }
@@ -529,7 +516,6 @@ private fun HomeScreenEmptyPreview() {
             onAddTask = { _, _ -> },
             onTaskClick = {},
             onStartFocus = {},
-            onOpenSettings = {},
         )
     }
 }
@@ -548,7 +534,6 @@ private fun HomeScreenErrorPreview() {
             onAddTask = { _, _ -> },
             onTaskClick = {},
             onStartFocus = {},
-            onOpenSettings = {},
         )
     }
 }
