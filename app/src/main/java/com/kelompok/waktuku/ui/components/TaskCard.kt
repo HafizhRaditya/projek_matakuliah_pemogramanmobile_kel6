@@ -36,6 +36,7 @@ import com.kelompok.waktuku.ui.theme.WaktuKuTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 1 (UI/UX dengan Jetpack Compose)
@@ -220,6 +221,11 @@ private fun buildDueDateLabel(task: Task): String {
     // SimpleDateFormat dipakai (bukan java.time) karena minSdk proyek ini
     // 24, sedangkan java.time baru tersedia mulai API 26.
     val formatter = SimpleDateFormat("d MMM yyyy", Locale.forLanguageTag("id-ID"))
+    // DatePicker menyimpan tanggal sebagai pukul 00.00 UTC. Kalau dibaca dengan
+    // zona waktu HP, pengguna di zona negatif (misalnya Amerika) akan melihat
+    // tanggal sehari lebih awal. Membaca dengan UTC selalu memberi tanggal
+    // yang sama dengan yang dipilih.
+    formatter.timeZone = TimeZone.getTimeZone("UTC")
     return formatter.format(Date(millis))
 }
 
