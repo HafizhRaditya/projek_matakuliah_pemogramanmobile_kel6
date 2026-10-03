@@ -139,7 +139,10 @@ class PomodoroViewModel(
         if (taskId == TimerUiState.NO_TASK || taskId == _uiState.value.taskId) return
         if (_uiState.value.phase != PomodoroPhase.IDLE) return
 
-        _uiState.value = _uiState.value.copy(taskId = taskId)
+        // Tugas baru berarti siklus baru. State dibuat ulang dari awal, bukan
+        // disalin, supaya hitungan "sesi ke berapa" milik tugas sebelumnya
+        // tidak terbawa (misalnya tugas baru langsung mulai di sesi 4 dari 4).
+        _uiState.value = TimerUiState(taskId = taskId)
 
         // Tugasnya terus DIAMATI, bukan dibaca sekali saja, karena tugas itu
         // bisa berubah selama timer berjalan:
@@ -321,6 +324,8 @@ class PomodoroViewModel(
         }
     }
 
+    // Ticker berjalan di viewModelScope, jadi ia otomatis dibatalkan saat
+    // ViewModel dihancurkan. Tidak perlu membatalkannya sendiri di onCleared.
     private fun jalankanTicker() {
         hentikanTicker()
         tickJob = viewModelScope.launch {
@@ -334,11 +339,6 @@ class PomodoroViewModel(
     private fun hentikanTicker() {
         tickJob?.cancel()
         tickJob = null
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        hentikanTicker()
     }
 
     companion object {

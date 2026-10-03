@@ -61,6 +61,7 @@ import com.kelompok.waktuku.ui.viewmodel.TaskDetailViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 // ============================================================================
 // PENANGGUNG JAWAB: Mahasiswa 1 (UI/UX), memakai logika dari Mahasiswa 2
@@ -464,8 +465,13 @@ private const val MAKS_RIWAYAT = 10
 
 // SimpleDateFormat dipakai (bukan java.time) karena minSdk proyek ini 24,
 // sedangkan java.time baru tersedia mulai API 26. Sama seperti di TaskCard.
+// Tenggat dari DatePicker tersimpan sebagai pukul 00.00 UTC, jadi dibaca dengan
+// zona UTC (penjelasannya di TaskCard). Waktu sesi di bawah tetap memakai zona
+// waktu HP, karena itu jam sungguhan saat sesi dimulai.
 private fun formatTanggal(millis: Long): String =
-    SimpleDateFormat("d MMM yyyy", Locale.forLanguageTag("id-ID")).format(Date(millis))
+    SimpleDateFormat("d MMM yyyy", Locale.forLanguageTag("id-ID"))
+        .apply { timeZone = TimeZone.getTimeZone("UTC") }
+        .format(Date(millis))
 
 private fun formatWaktu(millis: Long): String =
     SimpleDateFormat("d MMM, HH:mm", Locale.forLanguageTag("id-ID")).format(Date(millis))

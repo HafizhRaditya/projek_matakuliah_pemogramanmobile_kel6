@@ -299,6 +299,30 @@ class PomodoroViewModelTest {
     }
 
     @Test
+    fun `berganti tugas memulai siklus dari awal`() = ujiTimer { vm ->
+        taskRepository.tasks[2L] = Task(id = 2L, title = "Tugas lain", priority = TaskPriority.LOW)
+        vm.pilihTugas(1L)
+        runCurrent()
+        vm.mulai()
+
+        // Dua sesi fokus selesai untuk tugas pertama, lalu dihentikan.
+        repeat(2) {
+            majukanJam(25); vm.perbaruiDariJam()
+            majukanJam(5); vm.perbaruiDariJam()
+        }
+        runCurrent()
+        assertEquals(2, vm.uiState.value.completedFocusInCycle)
+        vm.hentikan()
+
+        vm.pilihTugas(2L)
+        runCurrent()
+
+        assertEquals(2L, vm.uiState.value.taskId)
+        assertEquals("Tugas lain", vm.uiState.value.taskTitle)
+        assertEquals(0, vm.uiState.value.completedFocusInCycle)
+    }
+
+    @Test
     fun `timer dikosongkan bila tugasnya dihapus`() = ujiTimer { vm ->
         vm.pilihTugas(1L)
         runCurrent()

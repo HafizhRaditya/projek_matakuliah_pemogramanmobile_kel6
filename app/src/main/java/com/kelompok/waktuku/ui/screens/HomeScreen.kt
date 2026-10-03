@@ -279,7 +279,7 @@ private fun SuccessContent(
 
         if (uiState.isEmpty) {
             // Sudah dimuat, tapi tidak ada tugas untuk ditampilkan.
-            EmptyState(filter = uiState.filter)
+            EmptyState(filter = uiState.filter, adaTugas = uiState.totalCount > 0)
         } else {
             TaskList(
                 tasks = uiState.tasks,
@@ -388,7 +388,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
  * yang membedakan aplikasi terasa matang atau tidak.
  */
 @Composable
-private fun EmptyState(filter: TaskFilter, modifier: Modifier = Modifier) {
+private fun EmptyState(filter: TaskFilter, adaTugas: Boolean, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -405,10 +405,12 @@ private fun EmptyState(filter: TaskFilter, modifier: Modifier = Modifier) {
             tint = MaterialTheme.colorScheme.outline,
         )
         Text(
-            text = when (filter) {
-                TaskFilter.ALL -> "Belum ada tugas.\nTekan \"Tugas baru\" untuk memulai."
-                TaskFilter.ACTIVE -> "Semua tugas sudah selesai. Kerja bagus!"
-                TaskFilter.DONE -> "Belum ada tugas yang diselesaikan."
+            // Bila belum ada tugas sama sekali, pesan "semua sudah selesai"
+            // pada filter Belum selesai akan menyesatkan.
+            text = when {
+                !adaTugas || filter == TaskFilter.ALL -> "Belum ada tugas.\nTekan \"Tugas baru\" untuk memulai."
+                filter == TaskFilter.ACTIVE -> "Semua tugas sudah selesai. Kerja bagus!"
+                else -> "Belum ada tugas yang diselesaikan."
             },
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

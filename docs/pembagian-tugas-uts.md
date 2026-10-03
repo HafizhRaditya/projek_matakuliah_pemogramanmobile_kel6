@@ -30,10 +30,10 @@ Beban kode yang harus dikuasai per 3 Oktober 2026:
 
 | | Berkas | Baris |
 |---|---|---|
-| M1 | 8 | 2.323 |
-| M2 | 6 (3 di antaranya berkas uji) | 1.681 |
+| M1 | 8 | 2.351 |
+| M2 | 6 (3 di antaranya berkas uji) | 1.705 |
 | M3 | 10 (termasuk `MigrationTest`) | 823 |
-| M4 | 6 + manifest | 499 |
+| M4 | 6 + manifest | 498 |
 
 F4 dan F6 ditunda sampai setelah UTS, jadi beban ini tidak bertambah lagi
 sebelum pengumpulan. Yang perlu dikejar sekarang adalah pemahaman, bukan baris
@@ -180,10 +180,14 @@ Daftar di bagian 7 tetap berguna sebagai urutan belajar.
 | Sesi bisa tercatat atas nama tugas lain | Tugas di timer bisa diganti di tengah sesi | `pilihTugas` diabaikan selama sesi berjalan atau dijeda |
 | Aplikasi tertutup paksa bila tugas yang sedang di timer dihapus | Foreign key menolak sesi untuk tugas yang sudah tidak ada | Timer mengamati tugasnya dan kosong kembali bila tugas dihapus |
 | Layar kosong bila tombol kembali di Detail terpanggil dua kali | `popBackStack()` kedua membuang Beranda | `popBackStack(HomeRoute, inclusive = false)` |
+| Tugas baru langsung mulai di "sesi 4 dari 4" (audit akhir) | Hitungan siklus tugas sebelumnya terbawa | `pilihTugas` membuat `TimerUiState` baru |
+| Tidak ada penjelasan saat tombol putar tugas lain ditekan di tengah sesi (audit akhir) | Tugas memang dikunci selama sesi | Layar Fokus menampilkan pesan; tugas yang dipilih dipasang begitu sesi dihentikan |
+| Tanggal tenggat bisa mundur sehari di zona waktu negatif (audit akhir) | DatePicker menyimpan 00.00 UTC, ditampilkan dengan zona HP | Tanggal dibaca dengan zona UTC |
+| Filter Belum selesai menampilkan "Semua tugas sudah selesai" saat belum ada tugas (audit akhir) | Pesan hanya melihat filter | Pesan juga melihat jumlah tugas |
 
 **Sudah selesai sejak status 1 Oktober:** B-1 mode demo (Biladi), U-6
 `DOKUMENTASI.md` (Abu Umar, fakta-faktanya sudah dicocokkan dengan kode), NIM
-Afkar (Afkar), H-1 dan H-4 (Hafizh). Uji unit kini 23, semua lulus.
+Afkar (Afkar), H-1 dan H-4 (Hafizh). Uji unit kini 24, semua lulus (per audit akhir 3 Oktober).
 
 **Sisa pekerjaan sampai Senin 5 Oktober 16.00:**
 

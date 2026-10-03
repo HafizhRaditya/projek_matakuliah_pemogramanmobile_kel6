@@ -4,7 +4,7 @@ Dokumen ini menjelaskan **arsitektur, implementasi fitur, pembagian kerja tim, d
 
 Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondisi riil repositori terkini:
 - Seluruh kode lolos kompilasi (`BUILD SUCCESSFUL`).
-- **23 unit tests** lulus semua (0 gagal, 0 diabaikan, 0 error).
+- **24 unit tests** lulus semua (0 gagal, 0 diabaikan, 0 error).
 - Navigasi antar-layar menggunakan **Type-Safe Navigation Compose** (`kotlinx.serialization`).
 - Basis data **Room SQLite v2** terlindungi migrasi manual non-destruktif (`MIGRATION_1_2`) dengan validasi skema JSON (`1.json`, `2.json`).
 
@@ -21,7 +21,7 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 | **Acuan Struktur** | [android/compose-samples](https://github.com/android/compose-samples) (arsitektur resmi Google / pola JetNews) |
 | **Layar Aktif (*Screens*)** | 3 layar penuh nyata: `HomeScreen`, `TimerScreen`, `TaskDetailScreen` |
 | **Basis Data** | Room SQLite v2 dengan migrasi manual non-destruktif `MIGRATION_1_2` dan validasi skema (`1.json`, `2.json`) |
-| **Pengujian Otomatis** | 23 unit tests (semua lulus) di seluruh suite pengujian ViewModel dan logika (`ExampleUnitTest`, `PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`) |
+| **Pengujian Otomatis** | 24 unit tests (semua lulus) di seluruh suite pengujian ViewModel dan logika (`ExampleUnitTest`, `PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`) |
 | **Sistem Navigasi** | Type-Safe Navigation Compose berbasis `kotlinx.serialization` (`HomeRoute`, `TimerRoute`, `TaskDetailRoute`) |
 | **Cakupan Tahap UTS** | Fitur Tugas (F1: CRUD + Filter + Undo), Navigasi (F2: Type-Safe NavHost), Timer Pomodoro (F3: Fokus, Istirahat, Anti-drift Jam Sistem, Auto-logging Room), Detail & Edit Tugas (F5: Form Edit + Riwayat Sesi). Fitur F4, F6, F7 resmi ditunda pasca-UTS. |
 
@@ -57,11 +57,11 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 | `ui/viewmodel/TaskViewModel.kt` | 248 | Pengelolaan tugas utama, enum `TaskFilter` (ALL, ACTIVE, DONE), kalkulasi progres tugas, soft-delete dengan penundaan snackbar undo, `HomeUiState` |
 | `ui/viewmodel/PomodoroViewModel.kt` | 380 | Logika Pomodoro Timer 25m/5m/15m (`PomodoroPhase`), perhitungan anti-drift berbasis `targetEndMillis` dan jam sistem yang disuntikkan lewat `nowMillis`, mode demo 5/1/3 detik (`DURASI_DEMO`, `DemoFactory`), pencatatan sesi otomatis ke database, `TimerUiState` |
 | `ui/viewmodel/TaskDetailViewModel.kt` | 280 | Logika layar detail & edit tugas, pembacaan argumen rute via `SavedStateHandle`, validasi input formulir, kalkulasi riwayat sesi pomodoro, `TaskDetailUiState` |
-| `test/.../PomodoroViewModelTest.kt` | 389 | 11 unit tests: akurasi countdown, pemulihan jeda, proteksi time-drift jam sistem, siklus 4 sesi istirahat panjang, auto-save sesi, mode demo, tugas tidak berganti saat sesi berjalan, timer dikosongkan saat tugasnya dihapus |
+| `test/.../PomodoroViewModelTest.kt` | 413 | 12 unit tests: akurasi countdown, pemulihan jeda, proteksi time-drift jam sistem, siklus 4 sesi istirahat panjang, auto-save sesi, mode demo, tugas tidak berganti saat sesi berjalan, timer dikosongkan saat tugasnya dihapus, siklus baru saat berganti tugas |
 | `test/.../TaskDetailViewModelTest.kt` | 207 | 6 unit tests: inisialisasi data form dari database, penanganan ID tidak valid, validasi batas target sesi, update data dan persistensi progres |
 | `test/.../TaskViewModelTest.kt` | 177 | 5 unit tests: initial loading state, mekanisme penundaan hapus (soft delete), pembatalan hapus (undo), penanganan error pembacaan database |
 | `test/.../ExampleUnitTest.kt` | 17 | 1 unit test bawaan Android Studio framework (verifikasi baseline JVM test runner) |
-| **Total Lapisan ViewModel & Test** | **1.698** | **3 berkas ViewModel (908 baris) + 4 berkas Unit Test (790 baris; 23 unit tests, semua lulus). Tanpa `ExampleUnitTest` bawaan: 1.681 baris.** |
+| **Total Lapisan ViewModel & Test** | **1.722** | **3 berkas ViewModel (908 baris) + 4 berkas Unit Test (814 baris; 24 unit tests, semua lulus). Tanpa `ExampleUnitTest` bawaan: 1.705 baris.** |
 
 ---
 
@@ -70,15 +70,15 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 
 | Berkas | Baris | Deskripsi & Tanggung Jawab |
 |---|---|---|
-| `ui/screens/HomeScreen.kt` | 539 | Layar Beranda: TopAppBar dengan ringkasan "x/y selesai", deretan filter chip, daftar tugas `LazyColumn` (`key = { task.id }`), tampilan Loading / Error / kosong, Snackbar Urungkan, FAB tambah tugas |
-| `ui/screens/TimerScreen.kt` | 348 | Layar Fokus: `CircularProgressIndicator` hitung mundur format mm:ss, warna berbeda untuk fase fokus dan istirahat, titik penanda 4 sesi, tombol Mulai / Jeda / Lanjut / Hentikan |
-| `ui/screens/TaskDetailScreen.kt` | 530 | Layar Detail Tugas: Formulir edit judul & catatan, pemilih prioritas visual, kontrol target pomodoro, riwayat statistik sesi fokus, tombol Simpan & Hapus |
-| `ui/components/TaskCard.kt` | 311 | Komponen kartu tugas: Checkbox status, judul tercoret saat selesai, badge prioritas, informasi tenggat waktu, tombol pintas navigasi ke Timer |
+| `ui/screens/HomeScreen.kt` | 541 | Layar Beranda: TopAppBar dengan ringkasan "x/y selesai", deretan filter chip, daftar tugas `LazyColumn` (`key = { task.id }`), tampilan Loading / Error / kosong, Snackbar Urungkan, FAB tambah tugas |
+| `ui/screens/TimerScreen.kt` | 374 | Layar Fokus: `CircularProgressIndicator` hitung mundur format mm:ss, warna berbeda untuk fase fokus dan istirahat, titik penanda 4 sesi, tombol Mulai / Jeda / Lanjut / Hentikan |
+| `ui/screens/TaskDetailScreen.kt` | 536 | Layar Detail Tugas: Formulir edit judul & catatan, pemilih prioritas visual, kontrol target pomodoro, riwayat statistik sesi fokus, tombol Simpan & Hapus |
+| `ui/components/TaskCard.kt` | 317 | Komponen kartu tugas: Checkbox status, judul tercoret saat selesai, badge prioritas, informasi tenggat waktu, tombol pintas navigasi ke Timer |
 | `ui/components/AddTaskDialog.kt` | 209 | Dialog modal tambah tugas: Input judul dengan validasi real-time (`isError` + `supportingText`) dan pilihan prioritas (`FilterChip`) |
 | `ui/theme/Color.kt` | 107 | Definisi palet warna Material Design 3 yang diturunkan dari seed sage `#4E7D6B` lewat ruang warna HCT, untuk tema terang dan gelap |
 | `ui/theme/Theme.kt` | 127 | Konfigurasi tema `WaktuKuTheme` (Light/Dark mode) dengan dynamic color dinonaktifkan demi konsistensi visual brand |
 | `ui/theme/Type.kt` | 152 | Definisi hierarki tipografi Material 3 (Display, Headline, Title, Body, Label) |
-| **Total Lapisan UI** | **2.323** | **3 Layar Composable + 2 Komponen + 3 Berkas Tema Material 3 (8 berkas, 2.323 baris)** |
+| **Total Lapisan UI** | **2.351** | **3 Layar Composable + 2 Komponen + 3 Berkas Tema Material 3 (8 berkas, 2.351 baris)** |
 
 ---
 
@@ -93,8 +93,8 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 | `ui/WaktuKuApp.kt` | 115 | Root Composable: Mengatur `Scaffold`, `WaktuKuBottomBar`, sinkronisasi visibilitas bottom bar, perpindahan tab `navigateToTab` (`popUpTo` + `launchSingleTop`), dan penanganan insets `consumeWindowInsets` |
 | `MainActivity.kt` | 30 | Entry point Activity tunggal (*Single-Activity Architecture*), mengaktifkan edge-to-edge dan membungkus `WaktuKuApp` dengan `WaktuKuTheme` |
 | `WaktuKuApplication.kt` | 29 | Kelas turunan `Application`, inisialisasi singleton `AppContainer` yang hidup selama proses aplikasi berjalan |
-| `AndroidManifest.xml` | 28 | Konfigurasi manifes aplikasi: deklarasi Activity tunggal (launcher) dan pengaitan `WaktuKuApplication` |
-| **Total Navigasi & Sistem** | **499** | **6 berkas Kotlin (471 baris) + 1 berkas AndroidManifest.xml (28 baris) = 499 baris** |
+| `AndroidManifest.xml` | 27 | Konfigurasi manifes aplikasi: deklarasi Activity tunggal (launcher) dan pengaitan `WaktuKuApplication` |
+| **Total Navigasi & Sistem** | **498** | **6 berkas Kotlin (471 baris) + 1 berkas AndroidManifest.xml (27 baris) = 498 baris** |
 
 ---
 
@@ -250,10 +250,10 @@ Struktur tim dan pembagian modul teknis untuk pemenuhan UTS (sesuai dokumen acua
 
 | Mahasiswa | NIM | Peran Utama | Folder Kerja | Beban Kode (UTS) | Modul yang Dikerjakan |
 |---|---|---|---|---|---|
-| **Hafizh Naufal Raditya** | H1D024061 | Mahasiswa 1<br/>*(UI/UX Jetpack Compose)* | `ui/screens`<br/>`ui/components`<br/>`ui/theme` | 8 berkas<br/>(2.323 baris) | • `HomeScreen.kt`<br/>• `TimerScreen.kt`<br/>• `TaskDetailScreen.kt`<br/>• `TaskCard.kt`<br/>• `AddTaskDialog.kt`<br/>• Sistem Tema M3 (`Color.kt`, `Theme.kt`, `Type.kt`) |
-| **Biladi Amna** | H1D024074 | Mahasiswa 2<br/>*(ViewModel & Business Logic)* | `ui/viewmodel`<br/>`src/test` | 6 berkas (+ 1 baseline test)<br/>(1.681 baris inti / 1.698 total) | • `TaskViewModel.kt`<br/>• `PomodoroViewModel.kt`<br/>• `TaskDetailViewModel.kt`<br/>• 23 Unit Tests (`PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`, `ExampleUnitTest`) |
+| **Hafizh Naufal Raditya** | H1D024061 | Mahasiswa 1<br/>*(UI/UX Jetpack Compose)* | `ui/screens`<br/>`ui/components`<br/>`ui/theme` | 8 berkas<br/>(2.351 baris) | • `HomeScreen.kt`<br/>• `TimerScreen.kt`<br/>• `TaskDetailScreen.kt`<br/>• `TaskCard.kt`<br/>• `AddTaskDialog.kt`<br/>• Sistem Tema M3 (`Color.kt`, `Theme.kt`, `Type.kt`) |
+| **Biladi Amna** | H1D024074 | Mahasiswa 2<br/>*(ViewModel & Business Logic)* | `ui/viewmodel`<br/>`src/test` | 6 berkas (+ 1 baseline test)<br/>(1.705 baris inti / 1.722 total) | • `TaskViewModel.kt`<br/>• `PomodoroViewModel.kt`<br/>• `TaskDetailViewModel.kt`<br/>• 24 Unit Tests (`PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`, `ExampleUnitTest`) |
 | **Muhammad Abu Umar** | H1D024084 | Mahasiswa 3<br/>*(Data Layer & Storage)* | `model`<br/>`data`<br/>`androidTest`<br/>`schemas` | 10 berkas + 2 skema JSON<br/>(823 baris) | • Entitas `Task.kt` & `PomodoroSession.kt`<br/>• `TaskDao.kt` & `PomodoroDao.kt`<br/>• `TaskRepository.kt` & `PomodoroRepository.kt`<br/>• `WaktuKuDatabase.kt` (Room v2)<br/>• `MIGRATION_1_2`<br/>• `AppContainer.kt`<br/>• `MigrationTest.kt` & Schema JSON (`1.json`, `2.json`) |
-| **Afkar Aufaa Farros** | H1D024085 | Mahasiswa 4<br/>*(Navigasi & Arsitektur Sistem)* | `ui/navigation`<br/>`ui`<br/>Root package | 6 berkas Kotlin + manifest<br/>(499 baris: 471 Kotlin + 28 XML) | • Type-Safe Destinations (`WaktuKuDestinations.kt`)<br/>• NavHost Multi-Screen (`WaktuKuNavHost.kt`)<br/>• Bottom Navigation (`WaktuKuBottomBar.kt`)<br/>• Scaffold Induk (`WaktuKuApp.kt`)<br/>• `MainActivity.kt`<br/>• `WaktuKuApplication.kt`<br/>• `AndroidManifest.xml` |
+| **Afkar Aufaa Farros** | H1D024085 | Mahasiswa 4<br/>*(Navigasi & Arsitektur Sistem)* | `ui/navigation`<br/>`ui`<br/>Root package | 6 berkas Kotlin + manifest<br/>(498 baris: 471 Kotlin + 27 XML) | • Type-Safe Destinations (`WaktuKuDestinations.kt`)<br/>• NavHost Multi-Screen (`WaktuKuNavHost.kt`)<br/>• Bottom Navigation (`WaktuKuBottomBar.kt`)<br/>• Scaffold Induk (`WaktuKuApp.kt`)<br/>• `MainActivity.kt`<br/>• `WaktuKuApplication.kt`<br/>• `AndroidManifest.xml` |
 
 Batas tanggung jawab modular ini menjamin tidak terjadi tumpang tindih suntingan kode di berkas yang sama dan meminimalkan potensi konflik Git selama kolaborasi.
 
@@ -270,9 +270,9 @@ Seluruh kode dalam proyek ini telah melalui pengujian otomatis dan verifikasi bu
 ### Rekapitulasi Hasil:
 - **Status Kompilasi**: `BUILD SUCCESSFUL` tanpa error.
 - **KSP Room Generator**: Pembuatan kode DAO dan skema tereksekusi mulus.
-- **Unit Test Suite**: **23 unit tests lulus semua (0 gagal, 0 diabaikan, 0 error).**
+- **Unit Test Suite**: **24 unit tests lulus semua (0 gagal, 0 diabaikan, 0 error).**
   - `ExampleUnitTest`: 1 test passed (baseline JVM test runner framework).
-  - `PomodoroViewModelTest`: 11 tests passed (akurasi sisa waktu, drift recovery, siklus 4 sesi, auto-save sesi fokus, mode demo, penguncian tugas saat sesi berjalan, timer kosong saat tugas dihapus).
+  - `PomodoroViewModelTest`: 12 tests passed (akurasi sisa waktu, drift recovery, siklus 4 sesi, auto-save sesi fokus, mode demo, penguncian tugas saat sesi berjalan, timer kosong saat tugas dihapus, siklus baru saat berganti tugas).
   - `TaskDetailViewModelTest`: 6 tests passed (validasi form, pembaruan data, proteksi ID invalid, persistensi target pomodoro).
   - `TaskViewModelTest`: 5 tests passed (loading state, soft delete, pembatalan penghapusan/undo, penanganan flow failure).
 - **Validasi Migrasi Room**: Skema `1.json` dan `2.json` sinkron dengan kode DDL `MIGRATION_1_2`, siap diuji lewat `MigrationTest` (uji instrumentasi ini butuh HP atau emulator dan belum dijalankan).
@@ -341,7 +341,7 @@ Seluruh kode dalam proyek ini telah melalui pengujian otomatis dan verifikasi bu
   - Migrasi manual non-destruktif `MIGRATION_1_2` tanpa kehilangan data pengguna.
   - Validasi skema database via JSON exports (`1.json` dan `2.json`).
 - [x] **Pengujian Otomatis Komprehensif**
-  - 23 unit tests lulus pada layer ViewModel dan logika bisnis.
+  - 24 unit tests lulus pada layer ViewModel dan logika bisnis.
 
 ### Keputusan Ruang Lingkup UTS (1 Oktober 2026):
 Supaya aplikasi tetap stabil dan seluruh kodenya bisa dijelaskan saat ujian lisan, fitur-fitur berikut secara resmi **ditunda (⏸) ke tahap pasca-UTS**:
@@ -362,7 +362,7 @@ Supaya aplikasi tetap stabil dan seluruh kodenya bisa dijelaskan saat ujian lisa
    ```
 
 ### Menjalankan Pengujian Unit (*Unit Tests*)
-Jalankan perintah berikut untuk menguji seluruh 23 unit test logic ViewModel:
+Jalankan perintah berikut untuk menguji seluruh 24 unit test logic ViewModel:
 ```bash
 ./gradlew :app:testDebugUnitTest
 ```
