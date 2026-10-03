@@ -199,6 +199,65 @@ Afkar (Afkar), H-1 dan H-4 (Hafizh). Uji unit kini 24, semua lulus (per audit ak
 | Hafizh | H-6 tangkapan layar, unggah tautan repo | Setelah video jadi |
 | Semua | Pelajari seluruh kode | Mulai dari bagian 7, lalu alur data di `DOKUMENTASI.md` bagian 3 |
 
+### Petunjuk tugas mandiri sebelum tenggat
+
+Tugas di bawah dikerjakan sendiri oleh pemiliknya dan di-push dari akun
+masing-masing. Bila memakai alat bantu AI, cantumkan di Formulir Deklarasi AI.
+
+**Sebelum mulai (semua orang):**
+
+```bash
+git checkout main
+git pull origin main
+git log --oneline -1
+```
+
+Baris terakhir harus menampilkan commit terbaru di GitHub. Cabang lama seperti
+`docs/u6-sinkronisasi-dokumentasi` sudah digabung dan dihapus; `git pull` dari
+cabang itu tidak membawa perubahan apa pun. Tanda aplikasi versi terbaru: di
+layar Fokus, di bawah empat titik, ada tulisan "Istirahat panjang setelah 4
+sesi fokus".
+
+**Abu Umar — U-1, menjalankan `MigrationTest`**
+
+1. `git checkout -b test/u1-migration-test`
+2. Sambungkan HP dengan USB debugging, lalu jalankan
+   `./gradlew :app:connectedDebugAndroidTest` (di Windows: `gradlew.bat`).
+   Perintah ini memasang aplikasi uji lalu mencopotnya lagi, sehingga data
+   WaktuKu di HP itu bisa terhapus. Jalankan sebelum mengisi data untuk video.
+3. Buka laporannya di `app/build/reports/androidTests/connected/`.
+4. Catat hasilnya (tanggal, tipe HP, jumlah uji yang lulus) di
+   `DOKUMENTASI.md` bagian 6, pada baris "Validasi Migrasi Room".
+5. Commit, push, lalu buka Pull Request. Bila ujinya gagal, kirim pesan
+   galatnya ke grup; jangan diubah menjadi "lulus".
+
+*Opsional untuk Abu Umar:* uji DAO di `app/src/androidTest/`, memakai
+`Room.inMemoryDatabaseBuilder`. Tiga hal yang layak diuji: tugas yang ditambah
+muncul di `observeAll()`; menghapus tugas ikut menghapus sesinya (CASCADE);
+`insertCompletedSession` menambah `completed_pomodoros`.
+
+**Afkar — A-1, uji navigasi di HP**
+
+1. Dari layar Fokus, tekan tab Beranda: harus pindah ke Beranda.
+2. Mulai sesi, tekan tombol kembali, lalu buka tab Fokus: timer harus masih
+   berjalan.
+3. Putar HP di layar Fokus dan di layar Detail: harus tetap di layar yang sama.
+4. Centang hasilnya di [PRD bagian F2](../PRD.md), commit di cabang
+   `docs/a1-uji-navigasi`, lalu buka Pull Request.
+
+*Opsional untuk Afkar:* ikon aplikasi masih ikon Android bawaan. Di Android
+Studio: klik kanan folder `app` → New → Image Asset → Launcher Icons, pilih
+gambar dan warna latar, Finish. Kerjakan di cabang `feat/ikon-aplikasi`.
+
+**Biladi — B-7, Formulir Deklarasi AI**
+
+Draf formulir sudah ada di Hafizh. Lengkapi bagian dalam kurung siku (alat AI
+yang dipakai tiap anggota), minta setiap anggota membaca isinya, lalu unggah
+ke eLDirU.
+
+**Aturan yang tetap berlaku:** jangan `git push --force`, jangan push langsung
+ke `main`, dan jangan meng-commit `MODE_DEMO = true`.
+
 ## 4. Tugas per orang
 
 Setiap tugas punya kode (H, B, U, A) supaya mudah disebut di grup dan dipakai

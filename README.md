@@ -60,7 +60,7 @@ app/src/main/java/com/kelompok/waktuku/
 | Mahasiswa 1 | Hafizh Naufal Raditya | H1D024061 | UI/UX (Jetpack Compose) | `ui/screens`, `ui/components`, `ui/theme` |
 | Mahasiswa 2 | Biladi Amna | H1D024074 | State & logika | `ui/viewmodel` |
 | Mahasiswa 3 | Muhammad Abu Umar | H1D024084 | Local storage | `model`, `data` |
-| Mahasiswa 4 | Afkar Aufaa Farros | H1D024085 | Navigasi & integrasi sistem | `ui/navigation`, `notification`, `data/preferences` |
+| Mahasiswa 4 | Afkar Aufaa Farros | H1D024085 | Navigasi & integrasi sistem | `ui/navigation`, `ui/WaktuKuApp.kt`, `MainActivity.kt`, `WaktuKuApplication.kt` |
 
 Kode "Mahasiswa N" sama dengan komentar `PENANGGUNG JAWAB` di kepala setiap
 berkas. Batas folder ini dipilih supaya empat orang bisa bekerja bersamaan
@@ -68,6 +68,37 @@ tanpa menyunting file yang sama - konflik Git jadi minimal.
 
 Sisa tugas tiap anggota ada di
 [docs/pembagian-tugas-uts.md](docs/pembagian-tugas-uts.md).
+
+## Kontribusi dan penggunaan AI
+
+Kelompok ini memakai alat bantu AI dan menyatakannya di Formulir Deklarasi
+Penggunaan AI yang dikumpulkan bersama UTS. Supaya riwayat commit tidak
+menimbulkan salah paham, beginilah cara kerja kami apa adanya:
+
+- **Sebagian besar kode ditulis lewat akun Hafizh dengan bantuan Claude Code.**
+  Commit seperti itu selalu bertanda `Co-Authored-By: Claude` di pesannya. Ini
+  mencakup kode di folder semua anggota, karena syarat teknis dari dosen
+  (minimal 5 dari 7 materi) harus terpenuhi sebelum tenggat.
+- **Tabel "Pembagian tugas" di atas menyatakan penanggung jawab**, yaitu siapa
+  yang wajib menguasai dan mampu menjelaskan kode di folder itu. Tabel itu
+  bukan daftar siapa yang mengetik setiap barisnya.
+- **Kontribusi langsung tiap anggota** tercatat di riwayat commit dan Pull
+  Request atas nama akun masing-masing:
+
+| Anggota | Kontribusi langsung |
+|---|---|
+| Hafizh | Mengarahkan pengerjaan lewat Claude Code, menguji aplikasi di HP, menggabungkan Pull Request |
+| Biladi | Mode demo timer beserta ujinya (`DURASI_DEMO`, `DemoFactory`), PR #15 |
+| Abu Umar | Menulis ulang `DOKUMENTASI.md` untuk status UTS; menyusun teks forum eLDirU |
+| Afkar | Menemukan bug tab Beranda lewat uji di HP (diperbaiki di PR #16); melengkapi data anggota |
+
+- **Setiap perubahan divalidasi** dengan build, uji unit (24 uji, semua lulus),
+  dan uji di HP. Daftar bug yang ditemukan beserta penyebab dan perbaikannya
+  ada di [docs/pembagian-tugas-uts.md](docs/pembagian-tugas-uts.md) bagian
+  "Status 3 Oktober 2026".
+
+Rincian per komponen (alat yang dipakai, tujuan, perkiraan persentase, dan
+langkah validasi) ada di formulir deklarasi.
 
 ## Panduan untuk anggota kelompok
 

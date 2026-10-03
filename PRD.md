@@ -135,12 +135,14 @@ jalan menujunya.
 > Sebagai pengguna, saya ingin berpindah antar Beranda, Fokus, dan Statistik
 > tanpa kehilangan posisi saya.
 
-- [x] `NavHost` dengan rute: `home`, `task/{taskId}`, `timer?taskId={taskId}`, `stats`, `settings`
-- [x] Bottom navigation tiga tab, tab aktif ditandai jelas
-- [ ] Tombol kembali perangkat berperilaku wajar (tidak keluar aplikasi dari
-      layar dalam) — kode sudah ada (`popUpTo` + `saveState`), menunggu uji di perangkat
+- [x] `NavHost` dengan rute type-safe: `HomeRoute`, `TimerRoute(taskId)`,
+      `TaskDetailRoute(taskId)` (rute Statistik dan Pengaturan ditunda, lihat bagian 9)
+- [x] Bottom navigation, tab aktif ditandai jelas (untuk UTS dua tab: Beranda dan Fokus)
+- [x] Tombol kembali perangkat berperilaku wajar (tidak keluar aplikasi dari
+      layar dalam) — diuji di Samsung A53 pada 3 Oktober 2026: dari layar Fokus
+      kembali ke Beranda dengan timer tetap berjalan, dari Beranda keluar aplikasi
 - [ ] Memutar layar tidak mengembalikan pengguna ke Beranda — kode sudah ada
-      (`rememberNavController`), menunggu uji di perangkat
+      (`rememberNavController`), menunggu uji di perangkat (A-1)
 
 ### F3 — Timer Pomodoro · P0
 
