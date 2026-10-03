@@ -68,10 +68,13 @@ class PomodoroViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun buatViewModel() = PomodoroViewModel(
+    private fun buatViewModel(
+        durasi: (PomodoroPhase) -> Int = PomodoroViewModel.DURASI_NORMAL,
+    ) = PomodoroViewModel(
         taskRepository = taskRepository,
         pomodoroRepository = pomodoroRepository,
         nowMillis = { jamPalsu },
+        durasiDetik = durasi,
     )
 
     /**
@@ -83,8 +86,11 @@ class PomodoroViewModelTest {
      * akan pernah "idle" selama ticker masih hidup, sehingga ujinya
      * menggantung selamanya. Menjeda timer akan membatalkan ticker itu.
      */
-    private fun ujiTimer(body: TestScope.(PomodoroViewModel) -> Unit) = runTest(dispatcher) {
-        val vm = buatViewModel()
+    private fun ujiTimer(
+        durasi: (PomodoroPhase) -> Int = PomodoroViewModel.DURASI_NORMAL,
+        body: TestScope.(PomodoroViewModel) -> Unit,
+    ) = runTest(dispatcher) {
+        val vm = buatViewModel(durasi)
         try {
             body(vm)
         } finally {
@@ -94,6 +100,10 @@ class PomodoroViewModelTest {
 
     private fun majukanJam(menit: Int) {
         jamPalsu += menit * 60_000L
+    }
+
+    private fun majukanDetik(detik: Int) {
+        jamPalsu += detik * 1_000L
     }
 
     // ------------------------------------------------------------------
@@ -221,6 +231,33 @@ class PomodoroViewModelTest {
         assertEquals(PomodoroPhase.LONG_BREAK, vm.uiState.value.phase)
         assertEquals(4, vm.uiState.value.completedFocusInCycle)
         assertEquals(4, pomodoroRepository.selesai.size)
+    }
+
+    @Test
+    fun `mode demo memakai durasi 5, 1, dan 3 detik`() = ujiTimer(PomodoroViewModel.DURASI_DEMO) { vm ->
+        vm.pilihTugas(1L)
+        runCurrent()
+        vm.mulai()
+
+        // Fokus pertama: 5 detik.
+        assertEquals(PomodoroPhase.FOCUS, vm.uiState.value.phase)
+        assertEquals(5, vm.uiState.value.totalSeconds)
+
+        // Tiga siklus pertama: fokus 5 detik lalu istirahat pendek 1 detik.
+        repeat(3) {
+            majukanDetik(5); vm.perbaruiDariJam(); runCurrent()
+            assertEquals(PomodoroPhase.SHORT_BREAK, vm.uiState.value.phase)
+            assertEquals(1, vm.uiState.value.totalSeconds)
+
+            majukanDetik(1); vm.perbaruiDariJam(); runCurrent()
+            assertEquals(PomodoroPhase.FOCUS, vm.uiState.value.phase)
+            assertEquals(5, vm.uiState.value.totalSeconds)
+        }
+
+        // Fokus keempat selesai -> istirahat panjang 3 detik.
+        majukanDetik(5); vm.perbaruiDariJam(); runCurrent()
+        assertEquals(PomodoroPhase.LONG_BREAK, vm.uiState.value.phase)
+        assertEquals(3, vm.uiState.value.totalSeconds)
     }
 
     @Test

@@ -106,6 +106,7 @@ class PomodoroViewModel(
      * memajukan jam sesuka hati.
      */
     private val nowMillis: () -> Long = System::currentTimeMillis,
+    private val durasiDetik: (PomodoroPhase) -> Int = DURASI_NORMAL,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
@@ -232,7 +233,7 @@ class PomodoroViewModel(
     }
 
     private fun mulaiFase(phase: PomodoroPhase) {
-        val totalDetik = phase.defaultMinutes * 60
+        val totalDetik = durasiDetik(phase)
         val sekarang = nowMillis()
 
         targetEndMillis = sekarang + totalDetik * 1000L
@@ -321,15 +322,30 @@ class PomodoroViewModel(
          */
         private const val TICK_INTERVAL_MILLIS = 250L
 
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application =
-                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as WaktuKuApplication
-                PomodoroViewModel(
-                    taskRepository = application.container.taskRepository,
-                    pomodoroRepository = application.container.pomodoroRepository,
-                )
+        val DURASI_NORMAL: (PomodoroPhase) -> Int = { it.defaultMinutes * 60 }
+        val DURASI_DEMO: (PomodoroPhase) -> Int = {
+            when (it) {
+                PomodoroPhase.IDLE -> 0
+                PomodoroPhase.FOCUS -> 5
+                PomodoroPhase.SHORT_BREAK -> 1
+                PomodoroPhase.LONG_BREAK -> 3
             }
         }
+
+        val Factory: ViewModelProvider.Factory = buatFactory(DURASI_NORMAL)
+        val DemoFactory: ViewModelProvider.Factory = buatFactory(DURASI_DEMO)
+
+        private fun buatFactory(durasi: (PomodoroPhase) -> Int): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    val application =
+                        this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as WaktuKuApplication
+                    PomodoroViewModel(
+                        taskRepository = application.container.taskRepository,
+                        pomodoroRepository = application.container.pomodoroRepository,
+                        durasiDetik = durasi,
+                    )
+                }
+            }
     }
 }
