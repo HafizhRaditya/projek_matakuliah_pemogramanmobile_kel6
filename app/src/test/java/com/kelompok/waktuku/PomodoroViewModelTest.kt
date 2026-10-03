@@ -279,6 +279,22 @@ class PomodoroViewModelTest {
         assertEquals("Belajar UTS", vm.uiState.value.taskTitle)
         assertEquals(1L, vm.uiState.value.taskId)
     }
+
+    @Test
+    fun `tugas tidak berganti saat sesi sedang berjalan`() = ujiTimer { vm ->
+        taskRepository.tasks[2L] = Task(id = 2L, title = "Tugas lain", priority = TaskPriority.LOW)
+        vm.pilihTugas(1L)
+        runCurrent()
+        vm.mulai()
+
+        // Pengguna kembali ke Beranda lalu menekan tombol putar tugas lain.
+        vm.pilihTugas(2L)
+        runCurrent()
+
+        // Sesi tetap milik tugas pertama, jadi tercatat atas nama yang benar.
+        assertEquals(1L, vm.uiState.value.taskId)
+        assertEquals("Belajar UTS", vm.uiState.value.taskTitle)
+    }
 }
 
 // ============================================================================

@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kelompok.waktuku.ui.theme.WaktuKuTheme
 import com.kelompok.waktuku.ui.viewmodel.PomodoroPhase
 import com.kelompok.waktuku.ui.viewmodel.PomodoroViewModel
@@ -54,12 +53,15 @@ import com.kelompok.waktuku.ui.viewmodel.TimerUiState
  *
  * @param taskId tugas yang akan difokuskan. Bernilai NO_TASK bila layar
  *        dibuka lewat tab Fokus tanpa memilih tugas lebih dulu.
+ * @param viewModel dibuat SEKALI di WaktuKuNavHost dan dikirim ke sini, bukan
+ *        dibuat di layar ini. Dengan begitu timer tidak ikut hilang saat
+ *        pengguna meninggalkan layar Fokus.
  */
 @Composable
 fun TimerScreen(
     taskId: Long,
+    viewModel: PomodoroViewModel,
     modifier: Modifier = Modifier,
-    viewModel: PomodoroViewModel = viewModel(factory = PomodoroViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -135,6 +137,16 @@ fun TimerScreen(
             }
 
             // --- Lingkaran hitung mundur ---
+            // Warna membedakan fase sekilas pandang: fokus memakai warna
+            // utama (primary), istirahat memakai warna aksen (tertiary).
+            val warnaFase = if (uiState.phase == PomodoroPhase.SHORT_BREAK ||
+                uiState.phase == PomodoroPhase.LONG_BREAK
+            ) {
+                MaterialTheme.colorScheme.tertiary
+            } else {
+                MaterialTheme.colorScheme.primary
+            }
+
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
                     // Lambda, bukan nilai langsung. Bentuk ini yang dipakai
@@ -142,6 +154,7 @@ fun TimerScreen(
                     // tanpa menggambar ulang seluruh komponen.
                     progress = { uiState.progress },
                     modifier = Modifier.size(260.dp),
+                    color = warnaFase,
                     strokeWidth = 14.dp,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
@@ -154,7 +167,7 @@ fun TimerScreen(
                     Text(
                         text = uiState.phase.label,
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = warnaFase,
                     )
                     Text(
                         text = uiState.timeLabel,
@@ -188,6 +201,14 @@ fun TimerScreen(
                     )
                 }
             }
+
+            // Keterangan aturan siklus, supaya titik-titik di atas tidak
+            // perlu ditebak artinya.
+            Text(
+                text = "Istirahat panjang setelah ${PomodoroViewModel.SESI_PER_SIKLUS} sesi fokus",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
             // --- Tombol ---
             Row(

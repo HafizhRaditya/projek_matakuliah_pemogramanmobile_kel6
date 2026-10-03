@@ -124,9 +124,18 @@ class PomodoroViewModel(
     // AKSI PENGGUNA
     // ---------------------------------------------------------------------
 
-    /** Mengambil judul tugas yang akan dikerjakan, dipanggil saat layar dibuka. */
+    /**
+     * Mengambil judul tugas yang akan dikerjakan, dipanggil saat layar dibuka.
+     *
+     * Permintaan diabaikan bila sebuah sesi sedang berjalan atau dijeda.
+     * ViewModel ini dipakai bersama oleh seluruh aplikasi, jadi tanpa aturan
+     * ini menekan tombol putar pada tugas lain akan mengganti tugas di tengah
+     * sesi - dan sesinya tercatat atas nama tugas yang salah. Pengguna perlu
+     * menekan Hentikan lebih dulu untuk berganti tugas.
+     */
     fun pilihTugas(taskId: Long) {
         if (taskId == TimerUiState.NO_TASK || taskId == _uiState.value.taskId) return
+        if (_uiState.value.phase != PomodoroPhase.IDLE) return
 
         _uiState.value = _uiState.value.copy(taskId = taskId)
         viewModelScope.launch {
@@ -266,7 +275,10 @@ class PomodoroViewModel(
                     pomodoroRepository.recordCompletedSession(
                         taskId = state.taskId,
                         startedAt = sessionStartMillis,
-                        durationMinutes = PomodoroPhase.FOCUS.defaultMinutes,
+                        // Dihitung dari durasi yang benar-benar dipakai,
+                        // dibulatkan ke atas: 25 menit pada mode normal,
+                        // 1 menit pada mode demo (5 detik).
+                        durationMinutes = (durasiDetik(PomodoroPhase.FOCUS) + 59) / 60,
                     )
                 }
 
