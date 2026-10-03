@@ -2,7 +2,9 @@
 
 **Kelompok 6 · WaktuKu** · keadaan per 16 September 2026, diperbarui
 17 September 2026 dengan ketentuan teknis project dari dosen (bagian 3), dan
-1 Oktober 2026 dengan keputusan lingkup UTS (bagian 3, "Status 1 Oktober 2026")
+1 Oktober 2026 dengan keputusan lingkup UTS (bagian 3, "Status 1 Oktober 2026"),
+dan 3 Oktober 2026 dengan ketentuan ujian lisan dan perbaikan bug (bagian 3,
+"Status 3 Oktober 2026")
 
 Dokumen ini menjawab tiga hal: siapa memegang bagian mana, apa yang masih
 harus dikerjakan, dan apa yang harus dikuasai tiap orang saat ditanya dosen.
@@ -24,14 +26,14 @@ Kode M1–M4 sama dengan komentar `PENANGGUNG JAWAB: Mahasiswa N` di kepala
 setiap berkas, jadi tidak ada berkas yang perlu diubah. Urutan M2–M4 mengikuti
 urutan nama. Boleh ditukar, asal sebelum mulai mengerjakan.
 
-Beban kode yang harus dikuasai per 1 Oktober 2026:
+Beban kode yang harus dikuasai per 3 Oktober 2026:
 
 | | Berkas | Baris |
 |---|---|---|
-| M1 | 8 | 2.285 |
-| M2 | 6 (3 di antaranya berkas uji) | 1.549 |
+| M1 | 8 | 2.323 |
+| M2 | 6 (3 di antaranya berkas uji) | 1.681 |
 | M3 | 10 (termasuk `MigrationTest`) | 823 |
-| M4 | 6 + manifest | 455 |
+| M4 | 6 + manifest | 499 |
 
 F4 dan F6 ditunda sampai setelah UTS, jadi beban ini tidak bertambah lagi
 sebelum pengumpulan. Yang perlu dikejar sekarang adalah pemahaman, bukan baris
@@ -56,12 +58,14 @@ Kriteria penilaian UTS dari eLDirU:
 struktur folder secara langsung. Maka:
 
 1. Setiap orang harus bisa menjelaskan **foldernya sendiri** sampai ke alasan
-   tiap keputusan.
+   tiap keputusan. Sejak 3 Oktober diketahui bahwa **bagian kode yang
+   ditanyakan dipilih dosen dari seluruh proyek**, jadi folder anggota lain
+   juga wajib dipelajari (lihat bagian 7).
 2. **Semua orang** harus bisa menjelaskan struktur folder secara keseluruhan
    (tabel di atas) dan satu alur data utuh dari layar sampai database
    ([DOKUMENTASI.md bagian 3](../DOKUMENTASI.md#3-arsitektur)).
-3. **Commit dari akun masing-masing.** Per 1 Oktober 2026 seluruh commit masih berasal dari
-   akun Hafizh. Riwayat Git adalah bukti siapa mengerjakan apa.
+3. **Commit dari akun masing-masing.** Per 3 Oktober 2026 Biladi, Abu Umar,
+   dan Afkar sudah punya commit dari akunnya sendiri. Riwayat Git adalah bukti siapa mengerjakan apa.
 
 ---
 
@@ -155,6 +159,42 @@ Tugas yang ikut ditunda: H-3, H-5, B-2, B-4, B-5, U-3, U-4, U-5, A-2, A-4.
 **Yang belum pernah diuji di HP:** layar Detail Tugas, navigasi setelah migrasi
 Type-Safe (A-1), dan `MigrationTest` (U-1).
 
+### Status 3 Oktober 2026
+
+**Ketentuan proses UTS dari dosen:**
+
+- UTS **bukan kegiatan kelompok** dan **bukan demo aplikasi**
+- Ujian lisan: setiap orang menjelaskan bagian kode yang dibuat bersama
+  kelompok, dan **bagian kodenya dipilih dosen**
+- Tidak ada sesi tanya jawab saat proses UTS
+
+Artinya setiap orang perlu memahami **seluruh** kode, bukan hanya foldernya.
+Daftar di bagian 7 tetap berguna sebagai urutan belajar.
+
+**Bug yang diperbaiki** (cabang `fix/uts-final`):
+
+| Bug | Penyebab | Perbaikan |
+|---|---|---|
+| Tab Beranda tidak bisa dibuka dari layar Fokus (laporan Afkar) | `saveState`/`restoreState` menyimpan layar Fokus atas nama Beranda, lalu memulihkannya saat tab Beranda ditekan | `navigateToTab` hanya memakai `popUpTo` + `launchSingleTop` |
+| Timer hilang saat tombol kembali ditekan di layar Fokus, dan bisa ada dua timer berjalan | `PomodoroViewModel` terikat pada layar Fokus | `PomodoroViewModel` dibuat sekali di `WaktuKuNavHost`, milik Activity |
+| Sesi bisa tercatat atas nama tugas lain | Tugas di timer bisa diganti di tengah sesi | `pilihTugas` diabaikan selama sesi berjalan atau dijeda |
+| Aplikasi tertutup paksa bila tugas yang sedang di timer dihapus | Foreign key menolak sesi untuk tugas yang sudah tidak ada | Timer mengamati tugasnya dan kosong kembali bila tugas dihapus |
+| Layar kosong bila tombol kembali di Detail terpanggil dua kali | `popBackStack()` kedua membuang Beranda | `popBackStack(HomeRoute, inclusive = false)` |
+
+**Sudah selesai sejak status 1 Oktober:** B-1 mode demo (Biladi), U-6
+`DOKUMENTASI.md` (Abu Umar, fakta-faktanya sudah dicocokkan dengan kode), NIM
+Afkar (Afkar), H-1 dan H-4 (Hafizh). Uji unit kini 23, semua lulus.
+
+**Sisa pekerjaan sampai Senin 5 Oktober 16.00:**
+
+| Siapa | Tugas | Catatan |
+|---|---|---|
+| Afkar | A-5 video demo, A-1 uji ulang di HP | Video direkam dengan `MODE_DEMO = true` di `WaktuKuNavHost.kt` (fokus 5 detik), lalu dikembalikan ke `false` |
+| Abu Umar | U-7 unggah teks forum, U-1 `MigrationTest` | Teks forum diunggah bersama tautan video |
+| Biladi | B-7 Formulir Deklarasi AI | Isi jujur, termasuk bagian yang dikerjakan dengan bantuan AI |
+| Hafizh | H-6 tangkapan layar, unggah tautan repo | Setelah video jadi |
+| Semua | Pelajari seluruh kode | Mulai dari bagian 7, lalu alur data di `DOKUMENTASI.md` bagian 3 |
+
 ## 4. Tugas per orang
 
 Setiap tugas punya kode (H, B, U, A) supaya mudah disebut di grup dan dipakai
@@ -168,10 +208,10 @@ setelah UTS · tanpa tanda berarti masih harus dikerjakan sebelum tenggat.
 | Kode | Fitur | Tugas | Menunggu |
 |---|---|---|---|
 | H-0 ✅ | — | Gabungkan PR `design/tema-dan-perbaikan-ui` dan PR `feat/f3-timer`. Undang Biladi, Abu Umar, dan Afkar sebagai *collaborator* | — |
-| H-1 | F3 | Rapikan `TimerScreen`: ikon Jeda dan Hentikan (Vector Asset, seperti ikon tab), angka timer lebih besar, warna berbeda untuk fokus dan istirahat, keterangan "istirahat panjang setelah 4 sesi" | H-0 |
+| H-1 ✅ | F3 | Rapikan `TimerScreen`: ikon Jeda dan Hentikan (Vector Asset, seperti ikon tab), angka timer lebih besar, warna berbeda untuk fokus dan istirahat, keterangan "istirahat panjang setelah 4 sesi" | H-0 |
 | H-2 ✅ | F5 | `TaskDetailScreen`: judul, catatan, chip prioritas, `DatePicker` tenggat, tombol −/+ target sesi, riwayat sesi, Simpan, Hapus dengan dialog konfirmasi | B-3 |
 | H-3 ⏸ | F6 | `StatsScreen`: kartu total sesi dan menit hari ini, diagram batang 7 hari digambar dengan `Canvas`, tampilan kosong | B-4 |
-| H-4 | — | Layar pembuka ikut mode gelap (`themes.xml`), centang pada chip prioritas di `AddTaskDialog` | — |
+| H-4 ✅ | — | Layar pembuka ikut mode gelap (`themes.xml`), centang pada chip prioritas di `AddTaskDialog` | — |
 | H-5 ⏸ | F7 | *Opsional:* `SettingsScreen` | A-4 |
 | H-6 | UTS | Tangkapan layar setiap layar (terang dan gelap). Sebagai perwakilan, unggah tautan repo dan tangkapan layar ke eLDirU | semua |
 | H-7 ✅ | Materi 2 | Tulis `Type.kt` sungguhan: minimal `headlineMedium`, `titleLarge`, `titleMedium`, `bodyLarge`, `bodyMedium`, `labelLarge`, `labelSmall` (fontFamily, fontWeight, fontSize, lineHeight, letterSpacing). Tidak ada `fontSize` hardcoded di layar | H-0 |
@@ -188,7 +228,7 @@ menetapkan bentuk data class-nya. Tidak perlu menunggu ViewModel selesai.
 
 | Kode | Fitur | Tugas | Menunggu |
 |---|---|---|---|
-| B-1 | F3 | **Mode demo:** durasi fase bisa dipersingkat (misal 10 detik). Wajib untuk video. Sekarang 25/5/15 menit tertulis tetap di enum `PomodoroPhase` | H-0 |
+| B-1 ✅ | F3 | **Mode demo:** durasi fase bisa dipersingkat (misal 10 detik). Wajib untuk video. Sekarang 25/5/15 menit tertulis tetap di enum `PomodoroPhase` | H-0 |
 | B-2 ⏸ | F3 | Simpan `targetEndMillis` ke `SavedStateHandle` supaya timer tidak hilang saat Android mematikan proses aplikasi (batasan ini tercatat di PRD bagian F3) | H-0 |
 | B-3 ✅ | F5 | `TaskDetailViewModel`: muat tugas lewat `observeTask(id)`, state form, validasi judul kosong, simpan, hapus. **Tetapkan `TaskDetailUiState` di hari pertama** supaya H-2 bisa jalan. Pakai pola Loading/Success/Error seperti B-8 | — |
 | B-4 ⏸ | F6 | `StatsViewModel`: gabungkan query menjadi `StatsUiState`. **Tetapkan bentuknya di hari pertama**. Pakai pola Loading/Success/Error seperti B-8 | U-3 |
@@ -227,14 +267,14 @@ sealed interface HomeUiState {
 | U-3 ⏸ | F6 | Query rekap sesi **per hari** untuk 7 hari terakhir. Yang ada sekarang baru total per rentang waktu (`observeCompletedCount`, `observeTotalMinutes`) | — |
 | U-4 ⏸ | F6 | **Putuskan:** "tugas selesai minggu ini" butuh kolom `completed_at` yang belum ada di `Task`. Pilih: tambah kolom lewat Migration 2→3 beserta ujinya, atau ubah kriterianya menjadi "total tugas selesai" dan catat di PRD | — |
 | U-5 ⏸ | F4 | Pasang penjadwal notifikasi buatan A-2 di `AppContainer` | A-2 |
-| U-6 | — | Perbarui [DOKUMENTASI.md](../DOKUMENTASI.md) bagian 2 dan 8. Daftar berkas dan daftar "yang belum dikerjakan" di sana sudah usang | — |
+| U-6 ✅ | — | Perbarui [DOKUMENTASI.md](../DOKUMENTASI.md) bagian 2 dan 8. Daftar berkas dan daftar "yang belum dikerjakan" di sana sudah usang | — |
 | U-7 | UTS | Teks forum eLDirU: perkenalan kelompok dan peran (tabel bagian 1), latar belakang ([PRD bagian 2](../PRD.md)), deskripsi aplikasi ([PRD bagian 1](../PRD.md)) | — |
 
 ### M4 · Afkar — Navigasi & sistem
 
 | Kode | Fitur | Tugas | Menunggu |
 |---|---|---|---|
-| A-1 | F2 | Uji di HP: (1) pindah Beranda → Fokus → Statistik, tekan kembali sekali, aplikasi harus langsung tertutup; (2) putar HP di tab Statistik, harus tetap di Statistik. Centang di PRD | — |
+| A-1 | F2 | Uji di HP: (1) pindah Beranda → Fokus, tekan kembali sekali, harus kembali ke Beranda dan timer tetap berjalan; (2) dari layar Fokus, tekan tab Beranda, harus pindah ke Beranda; (3) putar HP di layar Fokus, harus tetap di layar Fokus. Centang di PRD | — |
 | A-2 ⏸ | F4 | **Notifikasi** — rincian di bawah | — |
 | A-3 ✅ | F5, F6 | Ganti placeholder Detail dan Statistik (dan Pengaturan bila F7 dikerjakan) di `WaktuKuNavHost` dengan layar sungguhan. Hapus `PlaceholderScreen` setelah semuanya terganti, bersama M1 | H-2, H-3, A-6 |
 | A-4 ⏸ | F7 | *Opsional:* DataStore untuk Pengaturan di `data/preferences/` (perlu dependensi baru) | — |
@@ -327,7 +367,8 @@ paling sering disentuh orang lain. **Bilang dulu di grup** sebelum mengubahnya.
 Bahan jawaban tersedia di komentar setiap berkas, serta di
 [DOKUMENTASI.md](../DOKUMENTASI.md) bagian 4 dan 10.
 
-**Wajib dikuasai semua orang:**
+**Wajib dikuasai semua orang** (bagian kode dipilih dosen dari seluruh proyek,
+jadi daftar pertanyaan anggota lain juga perlu dibaca):
 
 - Struktur folder dan pemilik setiap folder (bagian 1)
 - Alur data saat pengguna mencentang tugas, dari `TaskCard` sampai Room lalu
@@ -363,6 +404,9 @@ Berkas: `TaskViewModel.kt`, `PomodoroViewModel.kt`,
   apa fungsi `.catch { }`?
 - Kenapa penghapusan tugas ditunda sampai Snackbar hilang?
 - Kenapa ViewModel butuh `Factory`?
+- Kenapa `PomodoroViewModel` dibuat di `WaktuKuNavHost`, bukan di
+  `TimerScreen`? Apa yang terjadi pada timer bila tugasnya dihapus?
+- Bagaimana mode demo bekerja (`DURASI_DEMO`, `DemoFactory`)?
 
 ### M3 · Abu Umar
 
@@ -391,7 +435,8 @@ Berkas: `WaktuKuDestinations.kt`, `WaktuKuBottomBar.kt`, `WaktuKuNavHost.kt`,
   seperti `"task/{taskId}"`?
 - Bagaimana `taskId` dikirim ke layar Detail (`TaskDetail(taskId)`,
   `toRoute()`), dan bagaimana `Timer` dibuka tanpa memilih tugas?
-- Apa fungsi `popUpTo`, `saveState`, `restoreState`, dan `launchSingleTop`?
+- Apa fungsi `popUpTo` dan `launchSingleTop`? Kenapa `saveState` dan
+  `restoreState` sengaja tidak dipakai? *(bug yang ditemukan Afkar)*
 - Kenapa tab aktif diperiksa lewat `hierarchy`?
 - Kenapa bottom bar ada di `WaktuKuApp` dan disembunyikan di Detail?
 - Apa itu pola *single-activity*? Apa peran kelas `Application`?
