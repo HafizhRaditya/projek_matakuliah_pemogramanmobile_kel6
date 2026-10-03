@@ -184,6 +184,7 @@ Daftar di bagian 7 tetap berguna sebagai urutan belajar.
 | Tidak ada penjelasan saat tombol putar tugas lain ditekan di tengah sesi (audit akhir) | Tugas memang dikunci selama sesi | Layar Fokus menampilkan pesan; tugas yang dipilih dipasang begitu sesi dihentikan |
 | Tanggal tenggat bisa mundur sehari di zona waktu negatif (audit akhir) | DatePicker menyimpan 00.00 UTC, ditampilkan dengan zona HP | Tanggal dibaca dengan zona UTC |
 | Filter Belum selesai menampilkan "Semua tugas sudah selesai" saat belum ada tugas (audit akhir) | Pesan hanya melihat filter | Pesan juga melihat jumlah tugas |
+| Layar Fokus terpotong dan tidak bisa digulir saat HP landscape (laporan Afkar) | Kolom isi layar tidak diberi `verticalScroll` | Layar Fokus dan dialog tambah tugas bisa digulir |
 
 **Sudah selesai sejak status 1 Oktober:** B-1 mode demo (Biladi), U-6
 `DOKUMENTASI.md` (Abu Umar, fakta-faktanya sudah dicocokkan dengan kode), NIM

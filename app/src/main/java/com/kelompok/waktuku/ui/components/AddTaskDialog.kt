@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -94,7 +96,14 @@ fun AddTaskDialog(
             // spacedBy dipilih daripada padding per elemen: jaraknya ditulis
             // satu kali di induk dan otomatis berlaku ke semua anak
             // (slide 30, "Mengapa Arrangement.spacedBy()").
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            //
+            // verticalScroll: saat landscape (apalagi dengan keyboard terbuka)
+            // tinggi dialog tidak cukup, jadi isinya dibuat bisa digulir
+            // supaya chip prioritas tidak terpotong.
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
 
                 OutlinedTextField(
                     value = title,
