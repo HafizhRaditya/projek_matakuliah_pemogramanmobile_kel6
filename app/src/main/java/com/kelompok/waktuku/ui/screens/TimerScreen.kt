@@ -66,14 +66,27 @@ fun TimerScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Memberi tahu ViewModel tugas mana yang dikerjakan. Dibungkus
-    // LaunchedEffect agar hanya dijalankan sekali saat taskId berubah, bukan
+    // LaunchedEffect agar hanya dijalankan saat kuncinya berubah, bukan
     // setiap kali layar digambar ulang.
-    LaunchedEffect(taskId) {
+    //
+    // Kunci kedua, sesiAktif, ada karena tugas tidak bisa diganti selama sesi
+    // berjalan. Begitu pengguna menekan Hentikan, sesiAktif berubah menjadi
+    // false, efek ini berjalan lagi, dan tugas yang tadi dipilih pengguna
+    // akhirnya dipasang.
+    val sesiAktif = uiState.phase != PomodoroPhase.IDLE
+    LaunchedEffect(taskId, sesiAktif) {
         viewModel.pilihTugas(taskId)
     }
 
+    // true bila pengguna menekan tombol putar tugas lain di Beranda, padahal
+    // sesi tugas sebelumnya masih berjalan.
+    val tugasLainDiminta = sesiAktif &&
+        taskId != TimerUiState.NO_TASK &&
+        taskId != uiState.taskId
+
     TimerScreen(
         uiState = uiState,
+        tugasLainDiminta = tugasLainDiminta,
         onMulai = viewModel::mulai,
         onJeda = viewModel::jeda,
         onLanjut = viewModel::lanjut,
@@ -87,6 +100,7 @@ fun TimerScreen(
 @Composable
 fun TimerScreen(
     uiState: TimerUiState,
+    tugasLainDiminta: Boolean,
     onMulai: () -> Unit,
     onJeda: () -> Unit,
     onLanjut: () -> Unit,
@@ -134,6 +148,15 @@ fun TimerScreen(
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Center,
                 )
+                if (tugasLainDiminta) {
+                    Text(
+                        text = "Sesi tugas ini masih berjalan. Tekan Hentikan untuk " +
+                            "beralih ke tugas yang kamu pilih.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
 
             // --- Lingkaran hitung mundur ---
@@ -312,6 +335,7 @@ private fun TimerScreenBerjalanPreview() {
                 taskId = 1L,
                 taskTitle = "Belajar UTS Basis Data",
             ),
+            tugasLainDiminta = false,
             onMulai = {}, onJeda = {}, onLanjut = {}, onHentikan = {},
         )
     }
@@ -331,6 +355,7 @@ private fun TimerScreenDijedaPreview() {
                 taskId = 1L,
                 taskTitle = "Rancang UI WaktuKu",
             ),
+            tugasLainDiminta = false,
             onMulai = {}, onJeda = {}, onLanjut = {}, onHentikan = {},
         )
     }
@@ -342,6 +367,7 @@ private fun TimerScreenTanpaTugasPreview() {
     WaktuKuTheme {
         TimerScreen(
             uiState = TimerUiState(),
+            tugasLainDiminta = false,
             onMulai = {}, onJeda = {}, onLanjut = {}, onHentikan = {},
         )
     }
