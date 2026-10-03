@@ -119,7 +119,13 @@ fun WaktuKuNavHost(
                 // Layar ini dicapai dari Beranda, bukan dari tab, jadi ia
                 // butuh jalan kembali. Dipanggil juga setelah tugas disimpan
                 // atau dihapus.
-                onBack = { navController.popBackStack() },
+                //
+                // Ditulis "kembali sampai Beranda", bukan popBackStack() biasa.
+                // Kalau pengguna menekan panah kembali tepat saat penyimpanan
+                // selesai, onBack terpanggil dua kali. popBackStack() yang
+                // kedua akan membuang Beranda juga, dan layar menjadi kosong.
+                // Dengan inclusive = false, Beranda tidak pernah ikut dibuang.
+                onBack = { navController.popBackStack(HomeRoute, inclusive = false) },
             )
         }
     }
