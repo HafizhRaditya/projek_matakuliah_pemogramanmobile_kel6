@@ -13,7 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -106,6 +105,7 @@ class PomodoroViewModel(
      * memajukan jam sesuka hati.
      */
     private val nowMillis: () -> Long = System::currentTimeMillis,
+    private val durasiDetik: (PomodoroPhase) -> Int = DURASI_NORMAL,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
@@ -119,18 +119,45 @@ class PomodoroViewModel(
 
     private var tickJob: Job? = null
 
+    /** Pengamat tugas yang sedang dipilih. Lihat pilihTugas. */
+    private var amatiTugasJob: Job? = null
+
     // ---------------------------------------------------------------------
     // AKSI PENGGUNA
     // ---------------------------------------------------------------------
 
-    /** Mengambil judul tugas yang akan dikerjakan, dipanggil saat layar dibuka. */
+    /**
+     * Mengambil judul tugas yang akan dikerjakan, dipanggil saat layar dibuka.
+     *
+     * Permintaan diabaikan bila sebuah sesi sedang berjalan atau dijeda.
+     * ViewModel ini dipakai bersama oleh seluruh aplikasi, jadi tanpa aturan
+     * ini menekan tombol putar pada tugas lain akan mengganti tugas di tengah
+     * sesi - dan sesinya tercatat atas nama tugas yang salah. Pengguna perlu
+     * menekan Hentikan lebih dulu untuk berganti tugas.
+     */
     fun pilihTugas(taskId: Long) {
         if (taskId == TimerUiState.NO_TASK || taskId == _uiState.value.taskId) return
+        if (_uiState.value.phase != PomodoroPhase.IDLE) return
 
         _uiState.value = _uiState.value.copy(taskId = taskId)
-        viewModelScope.launch {
-            val task = taskRepository.observeTask(taskId).first()
-            _uiState.value = _uiState.value.copy(taskTitle = task?.title.orEmpty())
+
+        // Tugasnya terus DIAMATI, bukan dibaca sekali saja, karena tugas itu
+        // bisa berubah selama timer berjalan:
+        //   - judulnya diubah di layar Detail  -> judul di layar Fokus ikut
+        //   - tugasnya dihapus                 -> timer dikosongkan
+        // Yang kedua penting. Tabel sesi memakai foreign key ke tabel tugas,
+        // jadi mencatat sesi untuk tugas yang sudah dihapus akan ditolak
+        // database dan membuat aplikasi tertutup paksa.
+        amatiTugasJob?.cancel()
+        amatiTugasJob = viewModelScope.launch {
+            taskRepository.observeTask(taskId).collect { task ->
+                if (task == null) {
+                    hentikanTicker()
+                    _uiState.value = TimerUiState()
+                } else {
+                    _uiState.value = _uiState.value.copy(taskTitle = task.title)
+                }
+            }
         }
     }
 
@@ -232,7 +259,7 @@ class PomodoroViewModel(
     }
 
     private fun mulaiFase(phase: PomodoroPhase) {
-        val totalDetik = phase.defaultMinutes * 60
+        val totalDetik = durasiDetik(phase)
         val sekarang = nowMillis()
 
         targetEndMillis = sekarang + totalDetik * 1000L
@@ -265,7 +292,10 @@ class PomodoroViewModel(
                     pomodoroRepository.recordCompletedSession(
                         taskId = state.taskId,
                         startedAt = sessionStartMillis,
-                        durationMinutes = PomodoroPhase.FOCUS.defaultMinutes,
+                        // Dihitung dari durasi yang benar-benar dipakai,
+                        // dibulatkan ke atas: 25 menit pada mode normal,
+                        // 1 menit pada mode demo (5 detik).
+                        durationMinutes = (durasiDetik(PomodoroPhase.FOCUS) + 59) / 60,
                     )
                 }
 
@@ -321,15 +351,30 @@ class PomodoroViewModel(
          */
         private const val TICK_INTERVAL_MILLIS = 250L
 
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application =
-                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as WaktuKuApplication
-                PomodoroViewModel(
-                    taskRepository = application.container.taskRepository,
-                    pomodoroRepository = application.container.pomodoroRepository,
-                )
+        val DURASI_NORMAL: (PomodoroPhase) -> Int = { it.defaultMinutes * 60 }
+        val DURASI_DEMO: (PomodoroPhase) -> Int = {
+            when (it) {
+                PomodoroPhase.IDLE -> 0
+                PomodoroPhase.FOCUS -> 5
+                PomodoroPhase.SHORT_BREAK -> 1
+                PomodoroPhase.LONG_BREAK -> 3
             }
         }
+
+        val Factory: ViewModelProvider.Factory = buatFactory(DURASI_NORMAL)
+        val DemoFactory: ViewModelProvider.Factory = buatFactory(DURASI_DEMO)
+
+        private fun buatFactory(durasi: (PomodoroPhase) -> Int): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    val application =
+                        this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as WaktuKuApplication
+                    PomodoroViewModel(
+                        taskRepository = application.container.taskRepository,
+                        pomodoroRepository = application.container.pomodoroRepository,
+                        durasiDetik = durasi,
+                    )
+                }
+            }
     }
 }

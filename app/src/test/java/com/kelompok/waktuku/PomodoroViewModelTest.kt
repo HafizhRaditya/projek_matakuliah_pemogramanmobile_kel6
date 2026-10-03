@@ -10,7 +10,9 @@ import com.kelompok.waktuku.ui.viewmodel.PomodoroViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -68,10 +70,13 @@ class PomodoroViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun buatViewModel() = PomodoroViewModel(
+    private fun buatViewModel(
+        durasi: (PomodoroPhase) -> Int = PomodoroViewModel.DURASI_NORMAL,
+    ) = PomodoroViewModel(
         taskRepository = taskRepository,
         pomodoroRepository = pomodoroRepository,
         nowMillis = { jamPalsu },
+        durasiDetik = durasi,
     )
 
     /**
@@ -83,8 +88,11 @@ class PomodoroViewModelTest {
      * akan pernah "idle" selama ticker masih hidup, sehingga ujinya
      * menggantung selamanya. Menjeda timer akan membatalkan ticker itu.
      */
-    private fun ujiTimer(body: TestScope.(PomodoroViewModel) -> Unit) = runTest(dispatcher) {
-        val vm = buatViewModel()
+    private fun ujiTimer(
+        durasi: (PomodoroPhase) -> Int = PomodoroViewModel.DURASI_NORMAL,
+        body: TestScope.(PomodoroViewModel) -> Unit,
+    ) = runTest(dispatcher) {
+        val vm = buatViewModel(durasi)
         try {
             body(vm)
         } finally {
@@ -94,6 +102,10 @@ class PomodoroViewModelTest {
 
     private fun majukanJam(menit: Int) {
         jamPalsu += menit * 60_000L
+    }
+
+    private fun majukanDetik(detik: Int) {
+        jamPalsu += detik * 1_000L
     }
 
     // ------------------------------------------------------------------
@@ -224,6 +236,33 @@ class PomodoroViewModelTest {
     }
 
     @Test
+    fun `mode demo memakai durasi 5, 1, dan 3 detik`() = ujiTimer(PomodoroViewModel.DURASI_DEMO) { vm ->
+        vm.pilihTugas(1L)
+        runCurrent()
+        vm.mulai()
+
+        // Fokus pertama: 5 detik.
+        assertEquals(PomodoroPhase.FOCUS, vm.uiState.value.phase)
+        assertEquals(5, vm.uiState.value.totalSeconds)
+
+        // Tiga siklus pertama: fokus 5 detik lalu istirahat pendek 1 detik.
+        repeat(3) {
+            majukanDetik(5); vm.perbaruiDariJam(); runCurrent()
+            assertEquals(PomodoroPhase.SHORT_BREAK, vm.uiState.value.phase)
+            assertEquals(1, vm.uiState.value.totalSeconds)
+
+            majukanDetik(1); vm.perbaruiDariJam(); runCurrent()
+            assertEquals(PomodoroPhase.FOCUS, vm.uiState.value.phase)
+            assertEquals(5, vm.uiState.value.totalSeconds)
+        }
+
+        // Fokus keempat selesai -> istirahat panjang 3 detik.
+        majukanDetik(5); vm.perbaruiDariJam(); runCurrent()
+        assertEquals(PomodoroPhase.LONG_BREAK, vm.uiState.value.phase)
+        assertEquals(3, vm.uiState.value.totalSeconds)
+    }
+
+    @Test
     fun `timer tidak bisa dimulai tanpa memilih tugas`() = ujiTimer { vm ->
 
         vm.mulai()
@@ -242,6 +281,45 @@ class PomodoroViewModelTest {
         assertEquals("Belajar UTS", vm.uiState.value.taskTitle)
         assertEquals(1L, vm.uiState.value.taskId)
     }
+
+    @Test
+    fun `tugas tidak berganti saat sesi sedang berjalan`() = ujiTimer { vm ->
+        taskRepository.tasks[2L] = Task(id = 2L, title = "Tugas lain", priority = TaskPriority.LOW)
+        vm.pilihTugas(1L)
+        runCurrent()
+        vm.mulai()
+
+        // Pengguna kembali ke Beranda lalu menekan tombol putar tugas lain.
+        vm.pilihTugas(2L)
+        runCurrent()
+
+        // Sesi tetap milik tugas pertama, jadi tercatat atas nama yang benar.
+        assertEquals(1L, vm.uiState.value.taskId)
+        assertEquals("Belajar UTS", vm.uiState.value.taskTitle)
+    }
+
+    @Test
+    fun `timer dikosongkan bila tugasnya dihapus`() = ujiTimer { vm ->
+        vm.pilihTugas(1L)
+        runCurrent()
+        vm.mulai()
+        majukanJam(10)
+        vm.perbaruiDariJam()
+
+        // Tugas dihapus dari Beranda atau layar Detail saat timer berjalan.
+        taskRepository.hapus(1L)
+        runCurrent()
+
+        assertEquals(PomodoroPhase.IDLE, vm.uiState.value.phase)
+        assertFalse(vm.uiState.value.isRunning)
+        assertTrue(vm.uiState.value.belumAdaTugas)
+
+        // Waktu sesi habis pun tidak ada yang dicatat untuk tugas yang hilang.
+        majukanJam(30)
+        vm.perbaruiDariJam()
+        runCurrent()
+        assertEquals(0, pomodoroRepository.selesai.size)
+    }
 }
 
 // ============================================================================
@@ -255,8 +333,17 @@ class PomodoroViewModelTest {
 private class FakeTaskRepository : TaskRepository {
     val tasks = mutableMapOf<Long, Task>()
 
+    // Dinaikkan setiap kali isi `tasks` diubah lewat hapus(), supaya
+    // observeTask memancarkan nilai baru seperti Flow dari Room.
+    private val versi = MutableStateFlow(0)
+
+    fun hapus(id: Long) {
+        tasks.remove(id)
+        versi.value++
+    }
+
     override fun observeTasks(): Flow<List<Task>> = flowOf(tasks.values.toList())
-    override fun observeTask(id: Long): Flow<Task?> = flowOf(tasks[id])
+    override fun observeTask(id: Long): Flow<Task?> = versi.map { tasks[id] }
     override suspend fun saveTask(task: Task): Long = task.id
     override suspend fun addTask(
         title: String,

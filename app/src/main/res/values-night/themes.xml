@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Tema jendela saat HP memakai mode gelap. Android memilih berkas di
+        folder values-night secara otomatis. Tanpa berkas ini, jendela
+        aplikasi selalu berlatar putih, sehingga layar sempat berkedip putih
+        sesaat sebelum tampilan Compose yang gelap muncul.
+    -->
+    <style name="Theme.WaktuKu" parent="android:Theme.Material.NoActionBar" />
+</resources>

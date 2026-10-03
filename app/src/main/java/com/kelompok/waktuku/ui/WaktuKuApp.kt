@@ -80,21 +80,28 @@ fun WaktuKuApp(modifier: Modifier = Modifier) {
 /**
  * Berpindah tab dengan perilaku yang benar.
  *
- * Tiga pengaturan di bawah ini yang membedakan bottom navigation yang terasa
+ * Dua pengaturan di bawah ini yang membedakan bottom navigation yang terasa
  * wajar dengan yang menjengkelkan:
  *
- * 1. `popUpTo(startDestination) { saveState = true }`
- *    Membersihkan tumpukan layar sampai Beranda, sambil MENYIMPAN kondisi tab
- *    yang ditinggalkan. Tanpa ini, berpindah tab bolak-balik sepuluh kali akan
- *    menumpuk sepuluh layar, dan pengguna harus menekan tombol kembali sepuluh
- *    kali untuk keluar dari aplikasi.
+ * 1. `popUpTo(startDestination)`
+ *    Membersihkan tumpukan layar sampai Beranda sebelum pindah tab. Tanpa
+ *    ini, berpindah tab bolak-balik sepuluh kali akan menumpuk sepuluh layar,
+ *    dan pengguna harus menekan tombol kembali sepuluh kali untuk keluar.
  *
  * 2. `launchSingleTop = true`
  *    Menekan tab yang sedang aktif tidak membuat salinan layar baru.
  *
- * 3. `restoreState = true`
- *    Mengembalikan kondisi tab saat dibuka lagi - misalnya posisi gulir daftar
- *    tugas dan filter yang sedang dipilih.
+ * Kenapa TIDAK memakai `saveState` dan `restoreState` seperti contoh resmi?
+ * Keduanya menyimpan tumpukan layar yang dibuang, lalu memulihkannya saat
+ * tujuan yang sama dibuka lagi. Di WaktuKu, layar Fokus juga bisa dibuka dari
+ * tombol putar di kartu tugas, sehingga ia menumpuk di atas Beranda. Dengan
+ * `saveState`, tumpukan [Fokus] itu tersimpan atas nama Beranda, dan menekan
+ * tab Beranda langsung memulihkannya: pengguna terlempar balik ke layar Fokus
+ * dan seolah tidak bisa kembali ke Beranda.
+ *
+ * Tanpa keduanya pun tidak ada yang hilang: Beranda tidak pernah dibuang
+ * karena ia tujuan awal, dan timer tersimpan di ViewModel milik Activity
+ * (lihat WaktuKuNavHost), bukan di layar Fokus.
  */
 private fun NavHostController.navigateToTab(destination: TopLevelDestination) {
 
@@ -102,8 +109,7 @@ private fun NavHostController.navigateToTab(destination: TopLevelDestination) {
     // TimerRoute(). Dengan type-safe navigation tidak perlu lagi membedakan
     // "pola alamat" dan "alamat tujuan" seperti saat rute masih berupa teks.
     navigate(destination.route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
+        popUpTo(graph.findStartDestination().id)
         launchSingleTop = true
-        restoreState = true
     }
 }

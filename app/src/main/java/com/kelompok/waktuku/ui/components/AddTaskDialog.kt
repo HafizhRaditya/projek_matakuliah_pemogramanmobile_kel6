@@ -146,6 +146,11 @@ fun AddTaskDialog(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TaskPriority.entries.forEach { option ->
+                        // Berbeda dengan layar Detail, chip di sini TIDAK diberi
+                        // ikon centang. Dialog lebih sempit dari layar, dan
+                        // ikon itu membuat chip ketiga terdesak sampai labelnya
+                        // patah menjadi dua baris ("Ting-gi"). Warna latar chip
+                        // yang terpilih sudah cukup sebagai penanda.
                         FilterChip(
                             selected = option == priority,
                             onClick = { priority = option },

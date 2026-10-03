@@ -60,7 +60,7 @@ app/src/main/java/com/kelompok/waktuku/
 | Mahasiswa 1 | Hafizh Naufal Raditya | H1D024061 | UI/UX (Jetpack Compose) | `ui/screens`, `ui/components`, `ui/theme` |
 | Mahasiswa 2 | Biladi Amna | H1D024074 | State & logika | `ui/viewmodel` |
 | Mahasiswa 3 | Muhammad Abu Umar | H1D024084 | Local storage | `model`, `data` |
-| Mahasiswa 4 | Afkar Aufaa Farros | *menyusul* | Navigasi & integrasi sistem | `ui/navigation`, `notification`, `data/preferences` |
+| Mahasiswa 4 | Afkar Aufaa Farros | H1D024085 | Navigasi & integrasi sistem | `ui/navigation`, `notification`, `data/preferences` |
 
 Kode "Mahasiswa N" sama dengan komentar `PENANGGUNG JAWAB` di kepala setiap
 berkas. Batas folder ini dipilih supaya empat orang bisa bekerja bersamaan
@@ -172,7 +172,8 @@ Atau buka folder ini di Android Studio, lalu tekan **Run**.
 - [x] Unit test `TaskViewModel`, `PomodoroViewModel`, dan `TaskDetailViewModel`
 - [x] Layar Detail Tugas
 - [x] UiState berpola Loading / Success / Error dan Type-Safe Navigation
-- [ ] Mode demo timer (durasi dipersingkat untuk video dan presentasi)
+- [x] Mode demo timer: ubah `MODE_DEMO` di `WaktuKuNavHost.kt` menjadi `true`
+  (fokus 5 detik, istirahat 1 dan 3 detik) untuk merekam video
 
 Ditunda sampai setelah UTS (alasannya di [PRD bagian 9](PRD.md#9-prioritas-dan-urutan-potong)):
 
