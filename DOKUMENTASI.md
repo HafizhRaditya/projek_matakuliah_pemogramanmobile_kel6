@@ -1,10 +1,10 @@
 # Dokumentasi Proyek WaktuKu (Status UTS)
 
-Dokumen ini menjelaskan **arsitektur, implementasi fitur, pembagian kerja tim, dan keputusan teknis aplikasi WaktuKu** per pencapaian Ujian Tengah Semester (UTS, 1–2 Oktober 2026).
+Dokumen ini menjelaskan **arsitektur, implementasi fitur, pembagian kerja tim, dan keputusan teknis aplikasi WaktuKu** per persiapan Ujian Tengah Semester (UTS), keadaan 3 Oktober 2026.
 
 Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondisi riil repositori terkini:
 - Seluruh kode lolos kompilasi (`BUILD SUCCESSFUL`).
-- **20 unit tests** terverifikasi **100% PASS** (0 gagal, 0 diabaikan, 0 error).
+- **23 unit tests** lulus semua (0 gagal, 0 diabaikan, 0 error).
 - Navigasi antar-layar menggunakan **Type-Safe Navigation Compose** (`kotlinx.serialization`).
 - Basis data **Room SQLite v2** terlindungi migrasi manual non-destruktif (`MIGRATION_1_2`) dengan validasi skema JSON (`1.json`, `2.json`).
 
@@ -16,13 +16,12 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 |---|---|
 | **Nama Aplikasi** | WaktuKu — Personal Planner & Pomodoro Timer |
 | **Karakteristik** | Android luring (*offline-first*), tanpa server dan tanpa internet |
-| **Bahasa & Toolchain** | Kotlin murni, Android Gradle Plugin (AGP) 9.3.2, KSP 2.2.10, Kotlin 2.x |
+| **Bahasa & Toolchain** | Kotlin 2.2.10, Android Gradle Plugin (AGP) 9.3.2, KSP 2.2.10-2.0.2 |
 | **Arsitektur** | MVVM (Model-View-ViewModel) + Unidirectional Data Flow (UDF) + Repository Pattern |
 | **Acuan Struktur** | [android/compose-samples](https://github.com/android/compose-samples) (arsitektur resmi Google / pola JetNews) |
-| **Total Berkas Proyek** | 74 berkas bersih (*clean without placeholders*) |
 | **Layar Aktif (*Screens*)** | 3 layar penuh nyata: `HomeScreen`, `TimerScreen`, `TaskDetailScreen` |
 | **Basis Data** | Room SQLite v2 dengan migrasi manual non-destruktif `MIGRATION_1_2` dan validasi skema (`1.json`, `2.json`) |
-| **Pengujian Otomatis** | 20 unit tests (100% PASS) di seluruh suite pengujian ViewModel dan logika (`ExampleUnitTest`, `PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`) |
+| **Pengujian Otomatis** | 23 unit tests (semua lulus) di seluruh suite pengujian ViewModel dan logika (`ExampleUnitTest`, `PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`) |
 | **Sistem Navigasi** | Type-Safe Navigation Compose berbasis `kotlinx.serialization` (`HomeRoute`, `TimerRoute`, `TaskDetailRoute`) |
 | **Cakupan Tahap UTS** | Fitur Tugas (F1: CRUD + Filter + Undo), Navigasi (F2: Type-Safe NavHost), Timer Pomodoro (F3: Fokus, Istirahat, Anti-drift Jam Sistem, Auto-logging Room), Detail & Edit Tugas (F5: Form Edit + Riwayat Sesi). Fitur F4, F6, F7 resmi ditunda pasca-UTS. |
 
@@ -38,7 +37,7 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 | `model/Task.kt` | 83 | `data class Task` sebagai `@Entity(tableName = "tasks")`, enum `TaskPriority` (LOW, MEDIUM, HIGH) |
 | `model/PomodoroSession.kt` | 65 | `data class PomodoroSession` sebagai `@Entity(tableName = "pomodoro_sessions")` dengan relasi ForeignKey ke `tasks` (`ON DELETE CASCADE`) dan indeks `task_id` |
 | `data/TaskDao.kt` | 73 | Kumpulan query Room: `observeAll()`, `observeById()`, `upsert()`, `delete()`, `updateDoneStatus()`, `deleteCompleted()` |
-| `data/PomodoroDao.kt` | 87 | Kumpulan query sesi: `insertSession()`, `observeSessionsForTask()`, `observeAllSessions()`, `countCompletedPomodorosForTask()`, `observeTotalFocusMinutes()` |
+| `data/PomodoroDao.kt` | 87 | Kumpulan query sesi: `insert()`, `insertCompletedSession()` (`@Transaction`: simpan sesi sekaligus menambah progres tugas), `incrementTaskProgress()`, `observeSessionsForTask()`, `observeCompletedCount()`, `observeTotalMinutes()` |
 | `data/TaskConverters.kt` | 29 | `@TypeConverter` dua arah penerjemah `TaskPriority` ⇄ `TEXT` (SQLite primitif) |
 | `data/TaskRepository.kt` | 94 | Abstraksi data: `interface TaskRepository` dan implementasi `class OfflineTaskRepository` |
 | `data/PomodoroRepository.kt` | 96 | Abstraksi sesi: `interface PomodoroRepository` dan implementasi `class OfflinePomodoroRepository` |
@@ -55,14 +54,14 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 
 | Berkas | Baris | Deskripsi & Tanggung Jawab |
 |---|---|---|
-| `ui/viewmodel/TaskViewModel.kt` | 248 | Pengelolaan tugas utama, enum `TaskFilter` (ALL, ACTIVE, COMPLETED), kalkulasi progres tugas, soft-delete dengan penundaan snackbar undo, `HomeUiState` |
-| `ui/viewmodel/PomodoroViewModel.kt` | 335 | Logika Pomodoro Timer 25m/5m/15m (`PomodoroPhase`), perhitungan anti-drift berbasis jam sistem (`System.currentTimeMillis()`), pencatatan sesi otomatis ke database, `PomodoroUiState` |
+| `ui/viewmodel/TaskViewModel.kt` | 248 | Pengelolaan tugas utama, enum `TaskFilter` (ALL, ACTIVE, DONE), kalkulasi progres tugas, soft-delete dengan penundaan snackbar undo, `HomeUiState` |
+| `ui/viewmodel/PomodoroViewModel.kt` | 380 | Logika Pomodoro Timer 25m/5m/15m (`PomodoroPhase`), perhitungan anti-drift berbasis `targetEndMillis` dan jam sistem yang disuntikkan lewat `nowMillis`, mode demo 5/1/3 detik (`DURASI_DEMO`, `DemoFactory`), pencatatan sesi otomatis ke database, `TimerUiState` |
 | `ui/viewmodel/TaskDetailViewModel.kt` | 280 | Logika layar detail & edit tugas, pembacaan argumen rute via `SavedStateHandle`, validasi input formulir, kalkulasi riwayat sesi pomodoro, `TaskDetailUiState` |
-| `test/.../PomodoroViewModelTest.kt` | 302 | 8 unit tests: akurasi countdown, pemulihan jeda, proteksi time-drift jam sistem, siklus 4 sesi istirahat panjang, auto-save sesi |
+| `test/.../PomodoroViewModelTest.kt` | 389 | 11 unit tests: akurasi countdown, pemulihan jeda, proteksi time-drift jam sistem, siklus 4 sesi istirahat panjang, auto-save sesi, mode demo, tugas tidak berganti saat sesi berjalan, timer dikosongkan saat tugasnya dihapus |
 | `test/.../TaskDetailViewModelTest.kt` | 207 | 6 unit tests: inisialisasi data form dari database, penanganan ID tidak valid, validasi batas target sesi, update data dan persistensi progres |
 | `test/.../TaskViewModelTest.kt` | 177 | 5 unit tests: initial loading state, mekanisme penundaan hapus (soft delete), pembatalan hapus (undo), penanganan error pembacaan database |
 | `test/.../ExampleUnitTest.kt` | 17 | 1 unit test bawaan Android Studio framework (verifikasi baseline JVM test runner) |
-| **Total Lapisan ViewModel & Test** | **1.566** | **3 berkas ViewModel (863 baris) + 4 berkas Unit Test (703 baris; 20 unit tests, 100% PASS). Subtotal 6 berkas buatan M2: 1.549 baris.** |
+| **Total Lapisan ViewModel & Test** | **1.698** | **3 berkas ViewModel (908 baris) + 4 berkas Unit Test (790 baris; 23 unit tests, semua lulus). Tanpa `ExampleUnitTest` bawaan: 1.681 baris.** |
 
 ---
 
@@ -71,15 +70,15 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 
 | Berkas | Baris | Deskripsi & Tanggung Jawab |
 |---|---|---|
-| `ui/screens/HomeScreen.kt` | 539 | Layar Beranda: Header sapaan waktu dinamis, kartu progres penyelesaian tugas, deretan filter chip, daftar tugas `LazyColumn`, host snackbar undo, FAB tambah tugas |
-| `ui/screens/TimerScreen.kt` | 327 | Layar Fokus: Tampilan circular progress indicator dinamis, countdown waktu format mm:ss, badge penanda fase, kontrol Start/Pause/Skip/Reset |
+| `ui/screens/HomeScreen.kt` | 539 | Layar Beranda: TopAppBar dengan ringkasan "x/y selesai", deretan filter chip, daftar tugas `LazyColumn` (`key = { task.id }`), tampilan Loading / Error / kosong, Snackbar Urungkan, FAB tambah tugas |
+| `ui/screens/TimerScreen.kt` | 348 | Layar Fokus: `CircularProgressIndicator` hitung mundur format mm:ss, warna berbeda untuk fase fokus dan istirahat, titik penanda 4 sesi, tombol Mulai / Jeda / Lanjut / Hentikan |
 | `ui/screens/TaskDetailScreen.kt` | 530 | Layar Detail Tugas: Formulir edit judul & catatan, pemilih prioritas visual, kontrol target pomodoro, riwayat statistik sesi fokus, tombol Simpan & Hapus |
-| `ui/components/TaskCard.kt` | 311 | Komponen kartu tugas: Checkbox status, judul tercoret animasi, badge prioritas, informasi tenggat waktu, tombol pintas navigasi ke Timer |
-| `ui/components/AddTaskDialog.kt` | 192 | Dialog modal tambah tugas: Input judul dengan validasi real-time, pilihan prioritas, input target sesi |
-| `ui/theme/Color.kt` | 107 | Definisi palet warna Material Design 3 yang diturunkan dari seed sage `#4E7D6B` dengan kontras rasio WCAG AAA/AA |
+| `ui/components/TaskCard.kt` | 311 | Komponen kartu tugas: Checkbox status, judul tercoret saat selesai, badge prioritas, informasi tenggat waktu, tombol pintas navigasi ke Timer |
+| `ui/components/AddTaskDialog.kt` | 209 | Dialog modal tambah tugas: Input judul dengan validasi real-time (`isError` + `supportingText`) dan pilihan prioritas (`FilterChip`) |
+| `ui/theme/Color.kt` | 107 | Definisi palet warna Material Design 3 yang diturunkan dari seed sage `#4E7D6B` lewat ruang warna HCT, untuk tema terang dan gelap |
 | `ui/theme/Theme.kt` | 127 | Konfigurasi tema `WaktuKuTheme` (Light/Dark mode) dengan dynamic color dinonaktifkan demi konsistensi visual brand |
 | `ui/theme/Type.kt` | 152 | Definisi hierarki tipografi Material 3 (Display, Headline, Title, Body, Label) |
-| **Total Lapisan UI** | **2.285** | **3 Layar Composable + 2 Komponen + 3 Berkas Tema Material 3 (8 berkas, 2.285 baris)** |
+| **Total Lapisan UI** | **2.323** | **3 Layar Composable + 2 Komponen + 3 Berkas Tema Material 3 (8 berkas, 2.323 baris)** |
 
 ---
 
@@ -89,13 +88,13 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 | Berkas | Baris | Deskripsi & Tanggung Jawab |
 |---|---|---|
 | `ui/navigation/WaktuKuDestinations.kt` | 92 | Definisi rute type-safe `@Serializable`: `HomeRoute`, `TimerRoute(taskId)`, `TaskDetailRoute(taskId)`, enum `TopLevelDestination` |
-| `ui/navigation/WaktuKuNavHost.kt` | 94 | Konfigurasi `NavHost` penghubung rute ke composable screens, resolusi argumen parameter menggunakan `toRoute<T>()` |
+| `ui/navigation/WaktuKuNavHost.kt` | 132 | Konfigurasi `NavHost` penghubung rute ke composable screens, resolusi argumen parameter menggunakan `toRoute<T>()`, serta pembuatan `PomodoroViewModel` sekali untuk seluruh aplikasi (pilihan `MODE_DEMO`) |
 | `ui/navigation/WaktuKuBottomBar.kt` | 73 | Komponen `NavigationBar` Material 3 dengan seleksi aktif otomatis berbasis pencocokan kelas rute `hasRoute(KClass)` |
-| `ui/WaktuKuApp.kt` | 109 | Root Composable: Mengatur `Scaffold`, `WaktuKuBottomBar`, sinkronisasi visibilitas bottom bar, dan penanganan insets `consumeWindowInsets` |
+| `ui/WaktuKuApp.kt` | 115 | Root Composable: Mengatur `Scaffold`, `WaktuKuBottomBar`, sinkronisasi visibilitas bottom bar, perpindahan tab `navigateToTab` (`popUpTo` + `launchSingleTop`), dan penanganan insets `consumeWindowInsets` |
 | `MainActivity.kt` | 30 | Entry point Activity tunggal (*Single-Activity Architecture*), mengaktifkan edge-to-edge dan membungkus `WaktuKuApp` dengan `WaktuKuTheme` |
 | `WaktuKuApplication.kt` | 29 | Kelas turunan `Application`, inisialisasi singleton `AppContainer` yang hidup selama proses aplikasi berjalan |
-| `AndroidManifest.xml` | 28 | Konfigurasi manifes aplikasi: deklarasi Activity tunggal, orientasi layar, dan pengaitan `WaktuKuApplication` |
-| **Total Navigasi & Sistem** | **455** | **6 berkas Kotlin (427 baris) + 1 berkas AndroidManifest.xml (28 baris) = 455 baris** |
+| `AndroidManifest.xml` | 28 | Konfigurasi manifes aplikasi: deklarasi Activity tunggal (launcher) dan pengaitan `WaktuKuApplication` |
+| **Total Navigasi & Sistem** | **499** | **6 berkas Kotlin (471 baris) + 1 berkas AndroidManifest.xml (28 baris) = 499 baris** |
 
 ---
 
@@ -123,7 +122,7 @@ flowchart TD
 
     subgraph VM["Lapisan ViewModel (Mahasiswa 2)"]
         TVM["TaskViewModel.kt<br/>(HomeUiState)"]
-        PVM["PomodoroViewModel.kt<br/>(PomodoroUiState)"]
+        PVM["PomodoroViewModel.kt<br/>(TimerUiState)"]
         TDVM["TaskDetailViewModel.kt<br/>(TaskDetailUiState)"]
     end
 
@@ -150,7 +149,7 @@ flowchart TD
     TDS -->|"Events / Intent"| TDVM
 
     TVM -->|"StateFlow&lt;HomeUiState&gt;"| HS
-    PVM -->|"StateFlow&lt;PomodoroUiState&gt;"| TS
+    PVM -->|"StateFlow&lt;TimerUiState&gt;"| TS
     TDVM -->|"StateFlow&lt;TaskDetailUiState&gt;"| TDS
 
     TVM --> TREPO
@@ -184,20 +183,18 @@ sequenceDiagram
     participant TRepo as TaskRepository
     participant Room as Room SQLite
 
-    User->>Timer: Tekan "Mulai Fokus"
-    Timer->>VM: startTimer()
-    Note over VM: Coroutine menghitung selisih jam sistem (anti-drift)
-    Note over VM: Waktu mencapai 00:00 (Fokus selesai)
-    VM->>PRepo: logSession(taskId, duration, completed=true)
-    PRepo->>Room: INSERT INTO pomodoro_sessions
-    VM->>TRepo: incrementCompletedPomodoro(taskId)
-    TRepo->>Room: UPDATE tasks SET completed_pomodoros = completed_pomodoros + 1
-    Room-->>PRepo: Flow tabel pomodoro_sessions memancar ulang
-    Room-->>TRepo: Flow tabel tasks memancar ulang
-    TRepo-->>VM: Data tugas terbarui
-    VM->>VM: Transisi fase otomatis ke SHORT_BREAK
-    VM-->>Timer: PomodoroUiState baru (fase istirahat, tombol Mulai Istirahat)
-    Timer-->>User: Tampilan berganti warna istirahat & progress melingkar penuh
+    User->>Timer: Tekan "Mulai fokus"
+    Timer->>VM: mulai()
+    Note over VM: targetEndMillis = nowMillis() + durasi fase
+    Note over VM: Ticker tiap 250 ms memanggil perbaruiDariJam()
+    Note over VM: Sisa waktu = targetEndMillis - nowMillis() habis, lalu selesaikanFase()
+    VM->>PRepo: recordCompletedSession(taskId, startedAt, durationMinutes)
+    PRepo->>Room: insertCompletedSession() dalam satu @Transaction
+    Note over Room: INSERT INTO pomodoro_sessions dan UPDATE tasks SET completed_pomodoros + 1
+    Room-->>TRepo: Flow tabel tasks memancar ulang (progres di Beranda bertambah)
+    VM->>VM: mulaiFase(SHORT_BREAK) otomatis
+    VM-->>Timer: TimerUiState baru (fase istirahat)
+    Timer-->>User: Lingkaran berganti warna istirahat dan mulai menghitung lagi
 ```
 
 ---
@@ -212,7 +209,7 @@ Bagian ini mendokumentasikan alasan mendalam di balik arsitektur WaktuKu sebagai
 
 2. **Pencegahan Time-Drift Pomodoro Menggunakan Jam Sistem**
    - *Masalah*: Implementasi timer naif yang hanya mengulang `delay(1000)` di coroutine rentan mengalami *time-drift* puluhan detik jika sistem operasi Android melakukan throttling proses di background atau saat HP masuk ke mode doze/layar mati.
-   - *Solusi*: `PomodoroViewModel` mencatat `targetEndTime = System.currentTimeMillis() + remainingMillis`. Setiap tick, sisa waktu dihitung dari `targetEndTime - System.currentTimeMillis()`. Jika aplikasi ditinggalkan selama 10 detik lalu dibuka lagi, timer langsung menyesuaikan diri ke sisa waktu nyata tanpa kehilangan presisi.
+   - *Solusi*: `PomodoroViewModel` mencatat `targetEndMillis = nowMillis() + durasi`. Setiap tick (250 ms), sisa waktu dihitung ulang dari `targetEndMillis - nowMillis()`. `nowMillis` bawaannya `System.currentTimeMillis`, dan diganti jam palsu di uji unit supaya sesi 25 menit bisa diuji seketika. Jika aplikasi ditinggalkan selama 10 detik lalu dibuka lagi, timer langsung menyesuaikan diri ke sisa waktu nyata tanpa kehilangan presisi.
 
 3. **Migrasi Database Manual Non-Destruktif (`MIGRATION_1_2`)**
    - *Masalah*: Penggunaan `fallbackToDestructiveMigration()` akan menghapus seluruh data tugas pengguna saat struktur database ditingkatkan versinya.
@@ -243,7 +240,7 @@ Bagian ini mendokumentasikan alasan mendalam di balik arsitektur WaktuKu sebagai
     - Tabel `pomodoro_sessions` memiliki relasi `ON DELETE CASCADE` ke tabel `tasks`. Jika tugas langsung dihapus permanen dari database, seluruh riwayat sesi fokusnya akan musnah seketika dan tidak dapat dipulihkan. WaktuKu menyembunyikan tugas terlebih dahulu (`markForDeletion`), menampilkan Snackbar "Urungkan", dan baru menghapus permanen ke SQLite jika waktu penundaan berakhir.
 
 12. **Sistem Warna Material 3 Berbasis Seed Sage Green `#4E7D6B`**
-    - Dynamic color (wallpaper-based) dinonaktifkan agar identitas visual WaktuKu tetap konsisten di seluruh perangkat. Palet warna Material 3 diturunkan dari seed `#4E7D6B` menggunakan algoritma HCT dengan rasio kontras teks di atas standar WCAG 4.5:1.
+    - Dynamic color (wallpaper-based) dinonaktifkan agar identitas visual WaktuKu tetap konsisten di seluruh perangkat. Palet warna Material 3 diturunkan dari seed `#4E7D6B` menggunakan algoritma warna Material 3 (ruang warna HCT), masing-masing untuk tema terang dan gelap.
 
 ---
 
@@ -253,10 +250,10 @@ Struktur tim dan pembagian modul teknis untuk pemenuhan UTS (sesuai dokumen acua
 
 | Mahasiswa | NIM | Peran Utama | Folder Kerja | Beban Kode (UTS) | Modul yang Dikerjakan |
 |---|---|---|---|---|---|
-| **Hafizh Naufal Raditya** | H1D024061 | Mahasiswa 1<br/>*(UI/UX Jetpack Compose)* | `ui/screens`<br/>`ui/components`<br/>`ui/theme` | 8 berkas<br/>(2.285 baris) | • `HomeScreen.kt`<br/>• `TimerScreen.kt`<br/>• `TaskDetailScreen.kt`<br/>• `TaskCard.kt`<br/>• `AddTaskDialog.kt`<br/>• Sistem Tema M3 (`Color.kt`, `Theme.kt`, `Type.kt`) |
-| **Biladi Amna** | H1D024074 | Mahasiswa 2<br/>*(ViewModel & Business Logic)* | `ui/viewmodel`<br/>`src/test` | 6 berkas (+ 1 baseline test)<br/>(1.549 baris inti / 1.566 total) | • `TaskViewModel.kt`<br/>• `PomodoroViewModel.kt`<br/>• `TaskDetailViewModel.kt`<br/>• 20 Unit Tests (`PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`, `ExampleUnitTest`) |
+| **Hafizh Naufal Raditya** | H1D024061 | Mahasiswa 1<br/>*(UI/UX Jetpack Compose)* | `ui/screens`<br/>`ui/components`<br/>`ui/theme` | 8 berkas<br/>(2.323 baris) | • `HomeScreen.kt`<br/>• `TimerScreen.kt`<br/>• `TaskDetailScreen.kt`<br/>• `TaskCard.kt`<br/>• `AddTaskDialog.kt`<br/>• Sistem Tema M3 (`Color.kt`, `Theme.kt`, `Type.kt`) |
+| **Biladi Amna** | H1D024074 | Mahasiswa 2<br/>*(ViewModel & Business Logic)* | `ui/viewmodel`<br/>`src/test` | 6 berkas (+ 1 baseline test)<br/>(1.681 baris inti / 1.698 total) | • `TaskViewModel.kt`<br/>• `PomodoroViewModel.kt`<br/>• `TaskDetailViewModel.kt`<br/>• 23 Unit Tests (`PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`, `ExampleUnitTest`) |
 | **Muhammad Abu Umar** | H1D024084 | Mahasiswa 3<br/>*(Data Layer & Storage)* | `model`<br/>`data`<br/>`androidTest`<br/>`schemas` | 10 berkas + 2 skema JSON<br/>(823 baris) | • Entitas `Task.kt` & `PomodoroSession.kt`<br/>• `TaskDao.kt` & `PomodoroDao.kt`<br/>• `TaskRepository.kt` & `PomodoroRepository.kt`<br/>• `WaktuKuDatabase.kt` (Room v2)<br/>• `MIGRATION_1_2`<br/>• `AppContainer.kt`<br/>• `MigrationTest.kt` & Schema JSON (`1.json`, `2.json`) |
-| **Afkar Aufaa Farros** | H1D024085 | Mahasiswa 4<br/>*(Navigasi & Arsitektur Sistem)* | `ui/navigation`<br/>`ui`<br/>Root package | 6 berkas Kotlin + manifest<br/>(455 baris: 427 Kotlin + 28 XML) | • Type-Safe Destinations (`WaktuKuDestinations.kt`)<br/>• NavHost Multi-Screen (`WaktuKuNavHost.kt`)<br/>• Bottom Navigation (`WaktuKuBottomBar.kt`)<br/>• Scaffold Induk (`WaktuKuApp.kt`)<br/>• `MainActivity.kt`<br/>• `WaktuKuApplication.kt`<br/>• `AndroidManifest.xml` |
+| **Afkar Aufaa Farros** | H1D024085 | Mahasiswa 4<br/>*(Navigasi & Arsitektur Sistem)* | `ui/navigation`<br/>`ui`<br/>Root package | 6 berkas Kotlin + manifest<br/>(499 baris: 471 Kotlin + 28 XML) | • Type-Safe Destinations (`WaktuKuDestinations.kt`)<br/>• NavHost Multi-Screen (`WaktuKuNavHost.kt`)<br/>• Bottom Navigation (`WaktuKuBottomBar.kt`)<br/>• Scaffold Induk (`WaktuKuApp.kt`)<br/>• `MainActivity.kt`<br/>• `WaktuKuApplication.kt`<br/>• `AndroidManifest.xml` |
 
 Batas tanggung jawab modular ini menjamin tidak terjadi tumpang tindih suntingan kode di berkas yang sama dan meminimalkan potensi konflik Git selama kolaborasi.
 
@@ -273,12 +270,12 @@ Seluruh kode dalam proyek ini telah melalui pengujian otomatis dan verifikasi bu
 ### Rekapitulasi Hasil:
 - **Status Kompilasi**: `BUILD SUCCESSFUL` tanpa error.
 - **KSP Room Generator**: Pembuatan kode DAO dan skema tereksekusi mulus.
-- **Unit Test Suite**: **20 unit tests lolos 100% (0 gagal, 0 diabaikan, 0 error)** dalam durasi ~1,96 detik.
+- **Unit Test Suite**: **23 unit tests lulus semua (0 gagal, 0 diabaikan, 0 error).**
   - `ExampleUnitTest`: 1 test passed (baseline JVM test runner framework).
-  - `PomodoroViewModelTest`: 8 tests passed (akurasi sisa waktu, drift recovery, siklus 4 sesi, auto-save sesi fokus, dsb).
+  - `PomodoroViewModelTest`: 11 tests passed (akurasi sisa waktu, drift recovery, siklus 4 sesi, auto-save sesi fokus, mode demo, penguncian tugas saat sesi berjalan, timer kosong saat tugas dihapus).
   - `TaskDetailViewModelTest`: 6 tests passed (validasi form, pembaruan data, proteksi ID invalid, persistensi target pomodoro).
   - `TaskViewModelTest`: 5 tests passed (loading state, soft delete, pembatalan penghapusan/undo, penanganan flow failure).
-- **Validasi Migrasi Room**: Skema `1.json` dan `2.json` sinkron dengan kode DDL `MIGRATION_1_2`, terverifikasi siap uji instrumentasi via `MigrationTest`.
+- **Validasi Migrasi Room**: Skema `1.json` dan `2.json` sinkron dengan kode DDL `MIGRATION_1_2`, siap diuji lewat `MigrationTest` (uji instrumentasi ini butuh HP atau emulator dan belum dijalankan).
 - **Artefak APK Debug**: Berhasil ter-generate di `app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
@@ -305,7 +302,7 @@ Seluruh kode dalam proyek ini telah melalui pengujian otomatis dan verifikasi bu
 
 4. **Time-Drift Akibat Doze Mode / Background Pause pada Coroutine Delay**
    - *Kendala*: Pemanggilan berkala `delay(1000)` di coroutine melenceng signifikan ketika ponsel mengalami sleep atau proses UI berpindah layar.
-   - *Solusi*: Menggunakan kalkulasi berbasis selisih epoch time (`targetEndTime - System.currentTimeMillis()`) untuk memvalidasi sisa detik secara mutlak.
+   - *Solusi*: Menggunakan kalkulasi berbasis selisih epoch time (`targetEndMillis - nowMillis()`) untuk memvalidasi sisa detik secara mutlak.
 
 5. **Ketelitian DDL Migrasi Room SQLite**
    - *Kendala*: Room Migration mensyaratkan skema hasil eksekusi migrasi identik hingga ke tanda petik balik (`` ` ``) dan urutan kolom dengan berkas `schemas/.../2.json`. Jika ada perbedaan minor, runtime Room akan melempar `IllegalStateException`.
@@ -317,7 +314,7 @@ Seluruh kode dalam proyek ini telah melalui pengujian otomatis dan verifikasi bu
 
 ### Fitur yang Sudah Selesai 100% (Tahap UTS):
 - [x] **F1: Task Management & Beranda (CRUD & Filtering)**
-  - Penambahan tugas baru dengan validasi judul dan target pomodoro.
+  - Penambahan tugas baru dengan validasi judul dan pilihan prioritas.
   - Checklist penyelesaian tugas seketika.
   - Hapus tugas dengan penundaan dan Snackbar Urungkan (*soft delete*).
   - Filter tugas berdasarkan status (Semua, Aktif, Selesai).
@@ -330,10 +327,13 @@ Seluruh kode dalam proyek ini telah melalui pengujian otomatis dan verifikasi bu
 - [x] **F3: Timer Pomodoro**
   - Fase Fokus (25 menit), Istirahat Singkat (5 menit), dan Istirahat Panjang (15 menit).
   - Siklus otomatis: 4 sesi fokus diikuti istirahat panjang.
-  - Perlindungan anti-drift menggunakan jam sistem (`System.currentTimeMillis()`).
+  - Perlindungan anti-drift menggunakan jam sistem (`targetEndMillis`).
+  - Satu timer untuk seluruh aplikasi: tetap berjalan saat pindah ke Beranda atau Detail.
+  - Mode demo 5 / 1 / 3 detik untuk video (konstanta `MODE_DEMO` di `WaktuKuNavHost.kt`).
   - Penyimpanan riwayat sesi fokus secara otomatis ke database SQLite.
 - [x] **F5: Task Detail & Editing**
-  - Layar detail untuk memperbarui judul, catatan, dan prioritas.
+  - Layar detail untuk memperbarui judul, catatan, prioritas, dan tenggat (`DatePicker`).
+  - Hapus tugas dengan dialog konfirmasi.
   - Pengaturan target jumlah pomodoro.
   - Rekapitulasi riwayat sesi fokus yang terhubung langsung ke tugas terkait.
 - [x] **Arsitektur Penyimpanan Database Room v2**
@@ -341,10 +341,10 @@ Seluruh kode dalam proyek ini telah melalui pengujian otomatis dan verifikasi bu
   - Migrasi manual non-destruktif `MIGRATION_1_2` tanpa kehilangan data pengguna.
   - Validasi skema database via JSON exports (`1.json` dan `2.json`).
 - [x] **Pengujian Otomatis Komprehensif**
-  - 20 unit tests lolos 100% pada layer ViewModel dan logika bisnis.
+  - 23 unit tests lulus pada layer ViewModel dan logika bisnis.
 
 ### Keputusan Ruang Lingkup UTS (1 Oktober 2026):
-Untuk menjamin stabilitas 100% saat demonstrasi UTS, mencegah regresi tak terduga, dan mempertahankan kebersihan arsitektur sistem, fitur-fitur berikut secara resmi **ditunda (⏸) ke tahap pasca-UTS**:
+Supaya aplikasi tetap stabil dan seluruh kodenya bisa dijelaskan saat ujian lisan, fitur-fitur berikut secara resmi **ditunda (⏸) ke tahap pasca-UTS**:
 - [ ] ⏸ **F4: Notifikasi Sistem & Alarm Audio** — Memerlukan penanganan izin Android 13+ `POST_NOTIFICATIONS`, `AlarmManager`, `BroadcastReceiver`, foreground service, dan pemutaran audio/getar saat timer habis di background.
 - [ ] ⏸ **F6: Statistik & Visualisasi Produktivitas** — Penambahan tab navigasi ketiga beserta agregasi data fokus 7 hari terakhir dan kanvas grafik batang (*custom canvas chart*).
 - [ ] ⏸ **F7: Pengaturan / Preferensi Pengguna** — Penyimpanan preferensi durasi timer kustom dan tema manual via Jetpack DataStore Preferences.
@@ -362,7 +362,7 @@ Untuk menjamin stabilitas 100% saat demonstrasi UTS, mencegah regresi tak terdug
    ```
 
 ### Menjalankan Pengujian Unit (*Unit Tests*)
-Jalankan perintah berikut untuk menguji seluruh 20 unit test logic ViewModel:
+Jalankan perintah berikut untuk menguji seluruh 23 unit test logic ViewModel:
 ```bash
 ./gradlew :app:testDebugUnitTest
 ```
@@ -398,10 +398,16 @@ Buka salah satu berkas layar (misalnya `HomeScreen.kt`, `TimerScreen.kt`, atau `
    - *Jawaban*: Rute string biasa (`"task/{taskId}"`) rawan *human error* seperti salah ketik URL atau salah passing tipe argumen, yang baru meledak menjadi crash di runtime. Dengan Type-Safe Navigation berbasis Kotlin Serialization (`@Serializable`), rute berupa objek/kelas Kotlin yang divalidasi langsung oleh compiler, menjamin keselamatan tipe (*compile-time safety*).
 
 6. **"Bagaimana cara memastikan countdown Pomodoro Timer tidak meleset saat HP masuk ke mode istirahat (Doze mode)?"**
-   - *Jawaban*: Timer WaktuKu tidak bergantung murni pada akumulasi `delay(1000)`. Saat timer dinyalakan, sistem mencatat waktu akhir target (`targetEndTime = System.currentTimeMillis() + sisaWaktu`). Pada setiap iterasi, sisa detik dihitung ulang dari selisih waktu sistem sekarang terhadap waktu target. Jika HP tertidur selama beberapa detik, timer langsung melompat ke sisa detik yang tepat saat dibangunkan kembali.
+   - *Jawaban*: Timer WaktuKu tidak bergantung murni pada akumulasi `delay(1000)`. Saat timer dinyalakan, sistem mencatat waktu akhir target (`targetEndMillis = nowMillis() + sisaWaktu`). Pada setiap iterasi, sisa detik dihitung ulang dari selisih waktu sistem sekarang terhadap waktu target. Jika HP tertidur selama beberapa detik, timer langsung melompat ke sisa detik yang tepat saat dibangunkan kembali.
 
 7. **"Apa pentingnya migrasi database `MIGRATION_1_2` dan mengapa tidak menggunakan `fallbackToDestructiveMigration()`?"**
    - *Jawaban*: `fallbackToDestructiveMigration()` akan menghapus bersih seluruh tabel dan data pengguna saat struktur database ditingkatkan ke versi 2. Dengan membuat migrasi manual non-destruktif (`ALTER TABLE` dan `CREATE TABLE`), data tugas yang sudah diinput pengguna pada versi 1 tetap aman dan utuh, dan keamanannya diverifikasi oleh `MigrationTest`.
 
 8. **"Mengapa menggunakan Dependency Injection manual (`AppContainer`) daripada pustaka otomatis seperti Dagger-Hilt?"**
    - *Jawaban*: Mengikuti acuan arsitektur resmi Google pada proyek percontohan JetNews. Untuk aplikasi berskala menengah yang beroperasi luring, DI manual memberikan transparansi perakitan objek tanpa keajaiban anotasi (*zero annotation magic*), mempercepat waktu kompilasi (*clean build*), dan mempermudah pemahaman alur dependensi saat presentasi kode.
+
+9. **"Kenapa `PomodoroViewModel` dibuat di `WaktuKuNavHost`, bukan di `TimerScreen` seperti ViewModel lain?"**
+   - *Jawaban*: ViewModel yang dibuat di dalam sebuah layar ikut hidup dan mati bersama layar itu di back stack. Timer harus tetap berjalan walau pengguna pindah ke Beranda atau menekan tombol kembali, dan aplikasi hanya boleh punya satu timer. Karena itu `viewModel()` dipanggil di `WaktuKuNavHost`, di luar blok `composable<...>`, sehingga pemiliknya adalah Activity. Polanya sama dengan `ProductViewModel` di praktikum Pertemuan 5.
+
+10. **"Kenapa perpindahan tab tidak memakai `saveState` dan `restoreState`?"**
+    - *Jawaban*: Layar Fokus juga dibuka dari tombol putar di kartu tugas, sehingga ia menumpuk di atas Beranda. Dengan `saveState`, tumpukan itu tersimpan atas nama Beranda dan langsung dipulihkan saat tab Beranda ditekan, sehingga pengguna tidak bisa kembali ke Beranda. Tanpa keduanya tidak ada yang hilang: Beranda tidak pernah dibuang karena ia tujuan awal, dan timer tersimpan di ViewModel milik Activity.
