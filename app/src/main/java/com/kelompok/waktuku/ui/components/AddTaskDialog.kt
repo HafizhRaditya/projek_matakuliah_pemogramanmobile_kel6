@@ -4,14 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -149,24 +146,15 @@ fun AddTaskDialog(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TaskPriority.entries.forEach { option ->
-                        val terpilih = option == priority
+                        // Berbeda dengan layar Detail, chip di sini TIDAK diberi
+                        // ikon centang. Dialog lebih sempit dari layar, dan
+                        // ikon itu membuat chip ketiga terdesak sampai labelnya
+                        // patah menjadi dua baris ("Ting-gi"). Warna latar chip
+                        // yang terpilih sudah cukup sebagai penanda.
                         FilterChip(
-                            selected = terpilih,
+                            selected = option == priority,
                             onClick = { priority = option },
                             label = { Text(option.label) },
-                            // Centang sebagai penanda kedua selain warna,
-                            // sama seperti chip prioritas di layar Detail.
-                            leadingIcon = if (terpilih) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(FilterChipDefaults.IconSize),
-                                    )
-                                }
-                            } else {
-                                null
-                            },
                         )
                     }
                 }
