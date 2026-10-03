@@ -13,7 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -120,6 +119,9 @@ class PomodoroViewModel(
 
     private var tickJob: Job? = null
 
+    /** Pengamat tugas yang sedang dipilih. Lihat pilihTugas. */
+    private var amatiTugasJob: Job? = null
+
     // ---------------------------------------------------------------------
     // AKSI PENGGUNA
     // ---------------------------------------------------------------------
@@ -138,9 +140,24 @@ class PomodoroViewModel(
         if (_uiState.value.phase != PomodoroPhase.IDLE) return
 
         _uiState.value = _uiState.value.copy(taskId = taskId)
-        viewModelScope.launch {
-            val task = taskRepository.observeTask(taskId).first()
-            _uiState.value = _uiState.value.copy(taskTitle = task?.title.orEmpty())
+
+        // Tugasnya terus DIAMATI, bukan dibaca sekali saja, karena tugas itu
+        // bisa berubah selama timer berjalan:
+        //   - judulnya diubah di layar Detail  -> judul di layar Fokus ikut
+        //   - tugasnya dihapus                 -> timer dikosongkan
+        // Yang kedua penting. Tabel sesi memakai foreign key ke tabel tugas,
+        // jadi mencatat sesi untuk tugas yang sudah dihapus akan ditolak
+        // database dan membuat aplikasi tertutup paksa.
+        amatiTugasJob?.cancel()
+        amatiTugasJob = viewModelScope.launch {
+            taskRepository.observeTask(taskId).collect { task ->
+                if (task == null) {
+                    hentikanTicker()
+                    _uiState.value = TimerUiState()
+                } else {
+                    _uiState.value = _uiState.value.copy(taskTitle = task.title)
+                }
+            }
         }
     }
 

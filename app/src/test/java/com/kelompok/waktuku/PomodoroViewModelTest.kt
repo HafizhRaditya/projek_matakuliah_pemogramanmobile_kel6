@@ -10,7 +10,9 @@ import com.kelompok.waktuku.ui.viewmodel.PomodoroViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -295,6 +297,29 @@ class PomodoroViewModelTest {
         assertEquals(1L, vm.uiState.value.taskId)
         assertEquals("Belajar UTS", vm.uiState.value.taskTitle)
     }
+
+    @Test
+    fun `timer dikosongkan bila tugasnya dihapus`() = ujiTimer { vm ->
+        vm.pilihTugas(1L)
+        runCurrent()
+        vm.mulai()
+        majukanJam(10)
+        vm.perbaruiDariJam()
+
+        // Tugas dihapus dari Beranda atau layar Detail saat timer berjalan.
+        taskRepository.hapus(1L)
+        runCurrent()
+
+        assertEquals(PomodoroPhase.IDLE, vm.uiState.value.phase)
+        assertFalse(vm.uiState.value.isRunning)
+        assertTrue(vm.uiState.value.belumAdaTugas)
+
+        // Waktu sesi habis pun tidak ada yang dicatat untuk tugas yang hilang.
+        majukanJam(30)
+        vm.perbaruiDariJam()
+        runCurrent()
+        assertEquals(0, pomodoroRepository.selesai.size)
+    }
 }
 
 // ============================================================================
@@ -308,8 +333,17 @@ class PomodoroViewModelTest {
 private class FakeTaskRepository : TaskRepository {
     val tasks = mutableMapOf<Long, Task>()
 
+    // Dinaikkan setiap kali isi `tasks` diubah lewat hapus(), supaya
+    // observeTask memancarkan nilai baru seperti Flow dari Room.
+    private val versi = MutableStateFlow(0)
+
+    fun hapus(id: Long) {
+        tasks.remove(id)
+        versi.value++
+    }
+
     override fun observeTasks(): Flow<List<Task>> = flowOf(tasks.values.toList())
-    override fun observeTask(id: Long): Flow<Task?> = flowOf(tasks[id])
+    override fun observeTask(id: Long): Flow<Task?> = versi.map { tasks[id] }
     override suspend fun saveTask(task: Task): Long = task.id
     override suspend fun addTask(
         title: String,
