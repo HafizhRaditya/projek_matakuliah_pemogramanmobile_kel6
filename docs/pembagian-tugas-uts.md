@@ -30,7 +30,7 @@ Beban kode yang harus dikuasai per 3 Oktober 2026:
 
 | | Berkas | Baris |
 |---|---|---|
-| M1 | 8 | 2.351 |
+| M1 | 8 | 2.370 |
 | M2 | 6 (3 di antaranya berkas uji) | 1.705 |
 | M3 | 10 (termasuk `MigrationTest`) | 823 |
 | M4 | 6 + manifest | 498 |
@@ -63,7 +63,7 @@ struktur folder secara langsung. Maka:
    juga wajib dipelajari (lihat bagian 7).
 2. **Semua orang** harus bisa menjelaskan struktur folder secara keseluruhan
    (tabel di atas) dan satu alur data utuh dari layar sampai database
-   ([DOKUMENTASI.md bagian 3](../DOKUMENTASI.md#3-arsitektur)).
+   ([DOKUMENTASI.md bagian 3](../DOKUMENTASI.md#3-arsitektur-aplikasi)).
 3. **Commit dari akun masing-masing.** Per 3 Oktober 2026 Biladi, Abu Umar,
    dan Afkar sudah punya commit dari akunnya sendiri. Riwayat Git adalah bukti siapa mengerjakan apa.
 
@@ -75,13 +75,13 @@ struktur folder secara langsung. Maka:
 |---|---|---|
 | F1 Beranda | P0 | **Selesai** di `main` |
 | F2 Navigasi | P0 | **Selesai** di `main`, sudah Type-Safe Navigation. Dua uji di HP belum dilakukan (tombol kembali, rotasi layar) |
-| F3 Timer Pomodoro | P0 | **Selesai** di `main` dengan 8 uji unit. **Belum ada mode demo** (B-1) |
+| F3 Timer Pomodoro | P0 | **Selesai** di `main` dengan 12 uji unit, termasuk mode demo (B-1) |
 | F4 Notifikasi | P0 | **Ditunda** sampai setelah UTS |
 | F5 Detail / edit tugas | P1 | **Selesai** di `main` dengan 6 uji unit. Belum diuji di HP |
 | F6 Statistik | P2 | **Ditunda** sampai setelah UTS |
 | F7 Pengaturan | P3 | **Ditunda** sampai setelah UTS |
 
-Keadaan `main` per 1 Oktober 2026: `assembleDebug` berhasil dan 20 uji unit
+Keadaan `main` per 4 Oktober 2026: `assembleDebug` berhasil dan 24 uji unit
 lulus.
 
 ### Ketentuan teknis dari dosen

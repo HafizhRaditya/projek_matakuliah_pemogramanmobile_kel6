@@ -76,14 +76,14 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 | Berkas | Baris | Deskripsi & Tanggung Jawab |
 |---|---|---|
 | `ui/screens/HomeScreen.kt` | 541 | Layar Beranda: TopAppBar dengan ringkasan "x/y selesai", deretan filter chip, daftar tugas `LazyColumn` (`key = { task.id }`), tampilan Loading / Error / kosong, Snackbar Urungkan, FAB tambah tugas |
-| `ui/screens/TimerScreen.kt` | 374 | Layar Fokus: `CircularProgressIndicator` hitung mundur format mm:ss, warna berbeda untuk fase fokus dan istirahat, titik penanda 4 sesi, tombol Mulai / Jeda / Lanjut / Hentikan |
+| `ui/screens/TimerScreen.kt` | 384 | Layar Fokus: `CircularProgressIndicator` hitung mundur format mm:ss, warna berbeda untuk fase fokus dan istirahat, titik penanda 4 sesi, tombol Mulai / Jeda / Lanjut / Hentikan |
 | `ui/screens/TaskDetailScreen.kt` | 536 | Layar Detail Tugas: Formulir edit judul & catatan, pemilih prioritas visual, kontrol target pomodoro, riwayat statistik sesi fokus, tombol Simpan & Hapus |
 | `ui/components/TaskCard.kt` | 317 | Komponen kartu tugas: Checkbox status, judul tercoret saat selesai, badge prioritas, informasi tenggat waktu, tombol pintas navigasi ke Timer |
-| `ui/components/AddTaskDialog.kt` | 209 | Dialog modal tambah tugas: Input judul dengan validasi real-time (`isError` + `supportingText`) dan pilihan prioritas (`FilterChip`) |
+| `ui/components/AddTaskDialog.kt` | 206 | Dialog modal tambah tugas: Input judul dengan validasi real-time (`isError` + `supportingText`) dan pilihan prioritas (`FilterChip`) |
 | `ui/theme/Color.kt` | 107 | Definisi palet warna Material Design 3 yang diturunkan dari seed sage `#4E7D6B` lewat ruang warna HCT, untuk tema terang dan gelap |
 | `ui/theme/Theme.kt` | 127 | Konfigurasi tema `WaktuKuTheme` (Light/Dark mode) dengan dynamic color dinonaktifkan demi konsistensi visual brand |
 | `ui/theme/Type.kt` | 152 | Definisi hierarki tipografi Material 3 (Display, Headline, Title, Body, Label) |
-| **Total Lapisan UI** | **2.351** | **3 Layar Composable + 2 Komponen + 3 Berkas Tema Material 3 (8 berkas, 2.351 baris)** |
+| **Total Lapisan UI** | **2.370** | **3 Layar Composable + 2 Komponen + 3 Berkas Tema Material 3 (8 berkas, 2.370 baris)** |
 
 ---
 
@@ -255,7 +255,7 @@ Struktur tim dan pembagian modul teknis untuk pemenuhan UTS (sesuai dokumen acua
 
 | Mahasiswa | NIM | Peran Utama | Folder Kerja | Beban Kode (UTS) | Modul yang Menjadi Tanggung Jawab |
 |---|---|---|---|---|---|
-| **Hafizh Naufal Raditya** | H1D024061 | Mahasiswa 1<br/>*(UI/UX Jetpack Compose)* | `ui/screens`<br/>`ui/components`<br/>`ui/theme` | 8 berkas<br/>(2.351 baris) | • `HomeScreen.kt`<br/>• `TimerScreen.kt`<br/>• `TaskDetailScreen.kt`<br/>• `TaskCard.kt`<br/>• `AddTaskDialog.kt`<br/>• Sistem Tema M3 (`Color.kt`, `Theme.kt`, `Type.kt`) |
+| **Hafizh Naufal Raditya** | H1D024061 | Mahasiswa 1<br/>*(UI/UX Jetpack Compose)* | `ui/screens`<br/>`ui/components`<br/>`ui/theme` | 8 berkas<br/>(2.370 baris) | • `HomeScreen.kt`<br/>• `TimerScreen.kt`<br/>• `TaskDetailScreen.kt`<br/>• `TaskCard.kt`<br/>• `AddTaskDialog.kt`<br/>• Sistem Tema M3 (`Color.kt`, `Theme.kt`, `Type.kt`) |
 | **Biladi Amna** | H1D024074 | Mahasiswa 2<br/>*(ViewModel & Business Logic)* | `ui/viewmodel`<br/>`src/test` | 6 berkas (+ 1 baseline test)<br/>(1.705 baris inti / 1.722 total) | • `TaskViewModel.kt`<br/>• `PomodoroViewModel.kt`<br/>• `TaskDetailViewModel.kt`<br/>• 24 Unit Tests (`PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`, `ExampleUnitTest`) |
 | **Muhammad Abu Umar** | H1D024084 | Mahasiswa 3<br/>*(Data Layer & Storage)* | `model`<br/>`data`<br/>`androidTest`<br/>`schemas` | 10 berkas + 2 skema JSON<br/>(823 baris) | • Entitas `Task.kt` & `PomodoroSession.kt`<br/>• `TaskDao.kt` & `PomodoroDao.kt`<br/>• `TaskRepository.kt` & `PomodoroRepository.kt`<br/>• `WaktuKuDatabase.kt` (Room v2)<br/>• `MIGRATION_1_2`<br/>• `AppContainer.kt`<br/>• `MigrationTest.kt` & Schema JSON (`1.json`, `2.json`) |
 | **Afkar Aufaa Farros** | H1D024085 | Mahasiswa 4<br/>*(Navigasi & Arsitektur Sistem)* | `ui/navigation`<br/>`ui`<br/>Root package | 6 berkas Kotlin + manifest<br/>(498 baris: 471 Kotlin + 27 XML) | • Type-Safe Destinations (`WaktuKuDestinations.kt`)<br/>• NavHost Multi-Screen (`WaktuKuNavHost.kt`)<br/>• Bottom Navigation (`WaktuKuBottomBar.kt`)<br/>• Scaffold Induk (`WaktuKuApp.kt`)<br/>• `MainActivity.kt`<br/>• `WaktuKuApplication.kt`<br/>• `AndroidManifest.xml` |

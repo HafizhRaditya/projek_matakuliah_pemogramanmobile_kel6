@@ -1,6 +1,8 @@
 # --- Gradle & build ---
 *.iml
 .gradle/
+# Folder sesi Kotlin 2.x (log galat kompilasi), dibuat otomatis
+.kotlin/
 /local.properties
 /build
 /app/build
