@@ -27,7 +27,12 @@ Dokumen ini memperbarui seluruh draf fondasi awal (v0.1) agar mencerminkan kondi
 
 ---
 
-## 2. Daftar Berkas yang Dibuat per Anggota / Layer
+## 2. Daftar Berkas per Penanggung Jawab / Layer
+
+> Daftar ini menyatakan **penanggung jawab** tiap berkas, yaitu anggota yang wajib
+> menguasai dan mampu menjelaskannya. Sebagian besar kode ditulis lewat akun
+> Hafizh dengan bantuan AI; rinciannya ada di README bagian "Kontribusi dan
+> penggunaan AI" dan di Formulir Deklarasi Penggunaan AI.
 
 ### Lapisan Data — Mahasiswa 3 (Muhammad Abu Umar / H1D024084)
 *Tanggung jawab: Model domain, entitas Room, DAO, konverter tipe, abstraksi Repository, migrasi database v1 ke v2, dan pengujian instrumentasi migrasi.*
@@ -248,7 +253,7 @@ Bagian ini mendokumentasikan alasan mendalam di balik arsitektur WaktuKu sebagai
 
 Struktur tim dan pembagian modul teknis untuk pemenuhan UTS (sesuai dokumen acuan `docs/pembagian-tugas-uts.md`):
 
-| Mahasiswa | NIM | Peran Utama | Folder Kerja | Beban Kode (UTS) | Modul yang Dikerjakan |
+| Mahasiswa | NIM | Peran Utama | Folder Kerja | Beban Kode (UTS) | Modul yang Menjadi Tanggung Jawab |
 |---|---|---|---|---|---|
 | **Hafizh Naufal Raditya** | H1D024061 | Mahasiswa 1<br/>*(UI/UX Jetpack Compose)* | `ui/screens`<br/>`ui/components`<br/>`ui/theme` | 8 berkas<br/>(2.351 baris) | • `HomeScreen.kt`<br/>• `TimerScreen.kt`<br/>• `TaskDetailScreen.kt`<br/>• `TaskCard.kt`<br/>• `AddTaskDialog.kt`<br/>• Sistem Tema M3 (`Color.kt`, `Theme.kt`, `Type.kt`) |
 | **Biladi Amna** | H1D024074 | Mahasiswa 2<br/>*(ViewModel & Business Logic)* | `ui/viewmodel`<br/>`src/test` | 6 berkas (+ 1 baseline test)<br/>(1.705 baris inti / 1.722 total) | • `TaskViewModel.kt`<br/>• `PomodoroViewModel.kt`<br/>• `TaskDetailViewModel.kt`<br/>• 24 Unit Tests (`PomodoroViewModelTest`, `TaskDetailViewModelTest`, `TaskViewModelTest`, `ExampleUnitTest`) |
