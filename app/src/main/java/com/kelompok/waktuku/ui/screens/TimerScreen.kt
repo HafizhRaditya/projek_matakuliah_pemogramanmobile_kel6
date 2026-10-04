@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -128,6 +130,12 @@ fun TimerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                // Saat HP diputar ke landscape, tinggi layar tidak cukup untuk
+                // lingkaran timer beserta tombolnya. verticalScroll membuat
+                // isinya bisa digulir, sehingga tombol tetap terjangkau. Di
+                // portrait tidak ada yang berubah: isi yang lebih pendek dari
+                // layar tetap berada di tengah.
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(28.dp, Alignment.CenterVertically),
@@ -290,6 +298,8 @@ private fun BelumMemilihTugas(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            // Bisa digulir juga, dengan alasan yang sama seperti layar timer.
+            .verticalScroll(rememberScrollState())
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
